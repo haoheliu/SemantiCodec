@@ -40,14 +40,11 @@ model:
     
     # Other parameters
     base_learning_rate: 1.0e-4
-    warmup_steps: 5000 # TODO more
     sampling_rate: 16000
     linear_start: 0.0015
     linear_end: 0.0195
     num_timesteps_cond: 1
-    log_every_t: 200
     timesteps: 1000
-    unconditional_prob_cfg: 0.1
     parameterization: v # [eps, x0, v]
     first_stage_key: fbank
     latent_t_size: 256 # TODO might need to change

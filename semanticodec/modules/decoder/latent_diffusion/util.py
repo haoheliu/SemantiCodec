@@ -13,6 +13,11 @@ from queue import Queue
 from inspect import isfunction
 from PIL import Image, ImageDraw, ImageFont
 
+def disabled_train(self, mode=True):
+    """Overwrite model.train with this function to make sure train/eval mode
+    does not change anymore."""
+    return self
+
 def get_unconditional_condition(self, batchsize, downsampling_rate, device):
     token_num = 512 // downsampling_rate
     representation_quant = (

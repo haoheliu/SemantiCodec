@@ -10,6 +10,9 @@ import pytorch_lightning as pl
 from contextlib import contextmanager
 from functools import partial
 from tqdm import tqdm
+import soundfile as sf
+import torchaudio
+from semanticodec.utils import extract_kaldi_fbank_feature
 
 from semanticodec.modules.decoder.latent_diffusion.util import (
     exists,
@@ -25,17 +28,8 @@ from semanticodec.modules.decoder.latent_diffusion.modules.diffusionmodules.util
     noise_like,)
 
 from semanticodec.modules.decoder.latent_diffusion.models.ddim import DDIMSampler
-from semanticodec.modules.decoder.latent_diffusion.util import get_unconditional_condition
-import soundfile as sf
+from semanticodec.modules.decoder.latent_diffusion.util import get_unconditional_condition, disabled_train
 
-
-def disabled_train(self, mode=True):
-    """Overwrite model.train with this function to make sure train/eval mode
-    does not change anymore."""
-    return self
-
-def uniform_on_device(r1, r2, shape, device):
-    return (r1 - r2) * torch.rand(*shape, device=device) + r2
 
 class DDPM(pl.LightningModule):
     # classic DDPM with Gaussian diffusion, in image space
@@ -50,7 +44,6 @@ class DDPM(pl.LightningModule):
         latent_t_size=256,
         latent_f_size=16,
         channels=3,
-        log_every_t=100,
         clip_denoised=True,
         linear_start=1e-4,
         linear_end=2e-2,
@@ -59,8 +52,6 @@ class DDPM(pl.LightningModule):
         v_posterior=0.0,  # weight for choosing posterior variance as sigma = (1-v) * beta_tilde + v * beta
         conditioning_key=None,
         parameterization="eps",  # all assuming fixed variance schedules
-        use_positional_encodings=False,
-        learn_logvar=False,
         logvar_init=0.0,
     ):
         super().__init__()
@@ -70,7 +61,6 @@ class DDPM(pl.LightningModule):
         assert sampling_rate is not None
         self.validation_folder_name = "temp_name"
         self.clip_denoised = clip_denoised
-        self.log_every_t = log_every_t
         self.first_stage_key = first_stage_key
         self.sampling_rate = sampling_rate
 
@@ -79,7 +69,6 @@ class DDPM(pl.LightningModule):
         self.v_posterior = v_posterior
 
         self.channels = channels
-        self.use_positional_encodings = use_positional_encodings
         self.model = DiffusionWrapper(unet_config, conditioning_key)
         count_params(self.model, verbose=True)
         self.use_ema = use_ema
@@ -96,12 +85,8 @@ class DDPM(pl.LightningModule):
             cosine_s=cosine_s,
         )
 
-        self.learn_logvar = learn_logvar
         self.logvar = torch.full(fill_value=logvar_init, size=(self.num_timesteps,))
-        if self.learn_logvar:
-            self.logvar = nn.Parameter(self.logvar, requires_grad=True)
-        else:
-            self.logvar = nn.Parameter(self.logvar, requires_grad=False)
+        self.logvar = nn.Parameter(self.logvar, requires_grad=False)
 
     def register_schedule(
         self,
@@ -275,11 +260,10 @@ class DDPM(pl.LightningModule):
         return model_mean + nonzero_mask * (0.5 * model_log_variance).exp() * noise
 
     @torch.no_grad()
-    def p_sample_loop(self, shape, return_intermediates=False):
+    def p_sample_loop(self, shape):
         device = self.betas.device
         b = shape[0]
         img = torch.randn(shape, device=device)
-        intermediates = [img]
         for i in tqdm(
             reversed(range(0, self.num_timesteps)),
             desc="Sampling t",
@@ -290,10 +274,6 @@ class DDPM(pl.LightningModule):
                 torch.full((b,), i, device=device, dtype=torch.long),
                 clip_denoised=self.clip_denoised,
             )
-            if i % self.log_every_t == 0 or i == self.num_timesteps - 1:
-                intermediates.append(img)
-        if return_intermediates:
-            return img, intermediates
         return img
 
     @torch.no_grad()
@@ -338,14 +318,6 @@ class LatentDiffusion(DDPM):
         first_stage_config,
         cond_stage_config=None,
         num_timesteps_cond=None,
-        cond_stage_key="image",
-        optimize_ddpm_parameter=True,
-        unconditional_prob_cfg=0.1,
-        warmup_steps=10000,
-        cond_stage_trainable=False,
-        concat_mode=True,
-        cond_stage_forward=None,
-        conditioning_key=None,
         scale_factor=1.0,
         evaluation_params={},
         scale_by_std=False,
@@ -356,16 +328,6 @@ class LatentDiffusion(DDPM):
         self.learning_rate = base_learning_rate
         self.num_timesteps_cond = default(num_timesteps_cond, 1)
         self.scale_by_std = scale_by_std
-        self.warmup_steps = warmup_steps
-        
-        if(optimize_ddpm_parameter):
-            if unconditional_prob_cfg == 0.0:
-                "You choose to optimize DDPM. The classifier free guidance scale should be 0.1"
-                unconditional_prob_cfg = 0.1
-        else:
-            if unconditional_prob_cfg == 0.1:
-                "You choose not to optimize DDPM. The classifier free guidance scale should be 0.0"
-                unconditional_prob_cfg = 0.0
 
         self.evaluation_params = evaluation_params
         assert self.num_timesteps_cond <= kwargs["timesteps"]
@@ -376,22 +338,17 @@ class LatentDiffusion(DDPM):
 
         super().__init__(conditioning_key=conditioning_key, *args, **kwargs)
 
-        self.optimize_ddpm_parameter = optimize_ddpm_parameter
-        self.concat_mode = concat_mode
-        self.cond_stage_key = cond_stage_key
-        self.cond_stage_key_orig = cond_stage_key
         try:
             self.num_downs = len(first_stage_config.params.ddconfig.ch_mult) - 1
         except:
             self.num_downs = 0
+
         if not scale_by_std:
             self.scale_factor = scale_factor
         else:
             self.register_buffer("scale_factor", torch.tensor(scale_factor))
         self.instantiate_first_stage(first_stage_config)
-        self.unconditional_prob_cfg = unconditional_prob_cfg
         self.cond_stage_models = nn.ModuleList([])
-        self.cond_stage_forward = cond_stage_forward
         self.clip_denoised = False
         self.bbox_tokenizer = None
         self.conditional_dry_run_finished = False
@@ -441,7 +398,7 @@ class LatentDiffusion(DDPM):
         return decoding
 
     def mel_spectrogram_to_waveform(
-        self, mel, savepath=".", bs=None, name="outwav", save=True
+        self, mel
     ):
         # Mel: [bs, 1, t-steps, fbins]
         if len(mel.size()) == 4:
@@ -449,35 +406,11 @@ class LatentDiffusion(DDPM):
         mel = mel.permute(0, 2, 1)
         waveform = self.first_stage_model.vocoder(mel)
         waveform = waveform.cpu().detach().numpy()
-        if save:
-            self.save_waveform(waveform, savepath, name)
         return waveform
 
     def encode_first_stage(self, x):
         with torch.no_grad():
             return self.first_stage_model.encode(x)
-
-    def save_waveform(self, waveform, savepath, name="outwav"):
-        for i in range(waveform.shape[0]):
-            if type(name) is str:
-                path = os.path.join(
-                    savepath, "%s_%s_%s.wav" % (self.global_step, i, name)
-                )
-            elif type(name) is list:
-                path = os.path.join(
-                    savepath,
-                    "%s.wav"
-                    % (
-                        os.path.basename(name[i])
-                        if (not ".wav" in name[i])
-                        else os.path.basename(name[i]).split(".")[0]
-                    ),
-                )
-            else:
-                raise NotImplementedError
-            todo_waveform = waveform[i, 0]
-            todo_waveform = (todo_waveform / np.max(np.abs(todo_waveform))) * 0.5 # Normalize the energy of the generation output
-            sf.write(path, todo_waveform, samplerate=self.sampling_rate)
 
     @torch.no_grad()
     def sample_log(
@@ -554,9 +487,7 @@ class LatentDiffusion(DDPM):
 
         mel = self.decode_first_stage(samples)
 
-        waveform = self.mel_spectrogram_to_waveform(
-            mel, savepath=".", bs=None, save=True
-        )
+        return self.mel_spectrogram_to_waveform(mel)
 
 class DiffusionWrapper(pl.LightningModule):
     def __init__(self, diff_model_config, conditioning_key):
@@ -576,15 +507,41 @@ class DiffusionWrapper(pl.LightningModule):
         out = self.diffusion_model(x, t, context_list=context_list, y=None, context_attn_mask_list=attn_mask_list)
         return out
 
-if __name__ == "__main__":
-    import yaml
+def extract_state_dict(checkpoint_path):
+    state_dict = torch.load(checkpoint_path)["state_dict"]
+    new_state_dict = {}
+    for key in state_dict.keys():
+        if "cond_stage_models.0" in key:
+            new_key_name = key.replace("cond_stage_models.0.","")
+            new_state_dict[new_key_name] = state_dict[key]
+    return new_state_dict
 
-    condition = torch.from_numpy(np.load("/mnt/bn/lqhaoheliu/project/SemantiCodec/cond.npy")).cuda()
+def test_512():
+    import yaml
+    from semanticodec.modules.encoder.encoder import AudioMAEConditionQuantResEncoder
+
+    checkpoint_path = "pretrained/semanticcodec_512.ckpt"
+    waveform, sr = torchaudio.load("KzvdKLdBw3s.wav")
+    mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
+    assert mel.shape == (1, 1024, 128)
+    
+    audiomaequant = AudioMAEConditionQuantResEncoder(feature_dimension=768, codebook_size=8192, use_positional_embedding=True, lstm_layer=4, lstm_bidirectional=True).cuda()
+    state_dict = extract_state_dict(checkpoint_path)
+    audiomaequant.load_state_dict(state_dict)
+
+    output = audiomaequant(mel.cuda())
+    condition = output["crossattn_audiomae_pooled"][0] # Use this feature for HEAR evaluation
+
+    print("Get condition success", condition.shape)
 
     config_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/config.yaml"
     config_yaml = yaml.load(open(config_path, "r"), Loader=yaml.FullLoader)
     latent_diffusion = instantiate_from_config(config_yaml["model"]).cuda()
-    checkpoint = torch.load("/mnt/bn/lqhaoheliu/project/SemantiCodec/pretrained/semanticcodec_512.ckpt")["state_dict"]
+    checkpoint = torch.load("pretrained/semanticcodec_512.ckpt")["state_dict"]
     checkpoint = {k:v for k,v in checkpoint.items() if "clap" not in k and "loss" not in k and "cond_stage" not in k}
     latent_diffusion.load_state_dict(checkpoint)
-    latent_diffusion.generate_sample(condition, ddim_steps=25)
+    waveform = latent_diffusion.generate_sample(condition, ddim_steps=25)
+    sf.write("test.wav", waveform[0,0], 16000)
+
+if __name__ == "__main__":
+    test_512()

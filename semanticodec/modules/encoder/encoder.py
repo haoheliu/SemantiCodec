@@ -101,6 +101,7 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
 
         self.indices_statistic_count = 0
         self.indices_statistic = {}
+        self.eval()
 
     # Required
     def get_unconditional_condition(self, batchsize):
@@ -321,10 +322,6 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
                 representation_residual
             )
 
-            # do stastistic of the indices here using indices_utilization_statistic
-            if torch.rand(1).item() < 0.01:
-                print(indices[0], representation_residual_quant)
-
             representation_quant = torch.cat(
                 [representation_residual_quant, representation_quant], dim=-1
             )
@@ -388,7 +385,7 @@ if __name__ == "__main__":
     output = audiomaequant(mel.cuda())
     assert output["audiomae_feature_after_quant"].shape == (1, 512, 768), output["audiomae_feature_after_quant"].shape # the first VQ layer feature
     output = output["crossattn_audiomae_pooled"][0] # Use this feature for HEAR evaluation
-    assert output.shape == (1, 512, 1536) == output.shape
+    assert output.shape == (1, 512, 1728) == output.shape
 
     # The 0.71 kbps checkpoint
     checkpoint_path = "pretrained/semanticcodec_256.ckpt"

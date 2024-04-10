@@ -2,3 +2,4 @@ pretrained
 *.npy
 *.wav
 g_*
+*.pyc
