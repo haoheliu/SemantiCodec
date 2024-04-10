@@ -34,7 +34,6 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
         self.feature_dimension = feature_dimension
         self.device = None
         self.pos_embed = PositionalEncoding(seq_length=512, embedding_dim=192)
-        
 
         if centroid_npy_path is None:
             # raise ValueError("centroid_npy_path is required")
@@ -321,7 +320,9 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
             representation_residual_quant, indices, commit_loss = self.quantizer(
                 representation_residual
             )
-
+            # import ipdb; ipdb.set_trace()
+            # assert torch.max(self.quantizer.get_output_from_indices(indices).reshape(1, 512, 768)-representation_residual_quant) <= 1e-5
+            tokens = torch.cat([tokens.unsqueeze(-1), indices.unsqueeze(-1)], dim=-1)
             representation_quant = torch.cat(
                 [representation_residual_quant, representation_quant], dim=-1
             )
@@ -329,17 +330,12 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
             # Oracle
             param = next(self.audiomae.parameters())
             assert param.requires_grad == False
-            device = param.device
-
-            if torch.rand(1).item() < 0.01:
-                print("Use Oracle")
-
-            commit_loss = torch.zeros((1,)).to(device)
+            tokens = None
 
             representation_quant = torch.cat([representation], dim=-1)
 
         if self.use_positional_embedding:
-            pe = self.pos_embed(representation_quant)
+            pe = self.pos_embed(representation_quant).to(representation_quant.device)
             representation_quant = torch.cat(
                 [representation_quant, pe.repeat(representation_quant.size(0), 1, 1)],
                 dim=-1,
@@ -352,15 +348,23 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
                 .to(representation_quant.device)
                 .float(),
             ],
-            commit_loss=commit_loss,
+            tokens = tokens,
             audiomae_feature_after_quant=audiomae_feature_after_quant,
         )
 
-    def wrap_return_dict(self, crossattn_audiomae_pooled, commit_loss, audiomae_feature_after_quant):
+    def token_to_quantized_feature(self, tokens):
+        semantic_tokens, acoustic_tokens = tokens[...,0], tokens[...,1]
+        semantic_feature = self.unquant(semantic_tokens)
+        acoustic_feature = self.quantizer.get_output_from_indices(acoustic_tokens).reshape(1, 512, 768)
+        return torch.cat(
+                [acoustic_feature, semantic_feature], dim=-1
+            )
+
+    def wrap_return_dict(self, crossattn_audiomae_pooled, tokens, audiomae_feature_after_quant):
         return {
-            "crossattn_audiomae_pooled": crossattn_audiomae_pooled,
-            "loss_noncond_commit_loss": commit_loss.mean(),
-            "audiomae_feature_after_quant": audiomae_feature_after_quant,
+            "quantized_feature": crossattn_audiomae_pooled,
+            "tokens": tokens,
+            "semantic_feature": audiomae_feature_after_quant,
         }
 
 

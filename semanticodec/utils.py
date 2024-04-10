@@ -60,9 +60,8 @@ def extract_kaldi_fbank_feature(waveform, sampling_rate, target_length=1024):
 
     return {"ta_kaldi_fbank": fbank} # [1024, 128] 
 
-class PositionalEncoding(nn.Module):
+class PositionalEncoding:
     def __init__(self, seq_length=512, embedding_dim=192):
-        super(PositionalEncoding, self).__init__()
         self.seq_length = seq_length
         self.embedding_dim = embedding_dim
         
@@ -74,12 +73,9 @@ class PositionalEncoding(nn.Module):
         pe[:, 1::2] = torch.cos(position * div_term)
         
         # Add a 'batch' dimension with 'unsqueeze'
-        pe = pe.unsqueeze(0)
-        
-        # Register as buffer to not consider as a model parameter
-        self.register_buffer('pe', pe)
+        self.pe = pe.unsqueeze(0)
 
-    def forward(self, x):
+    def __call__(self, x):
         """
         Args:
             x: Tensor, shape [batch_size, seq_length, embedding_dim]

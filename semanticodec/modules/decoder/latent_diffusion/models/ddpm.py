@@ -29,6 +29,7 @@ from semanticodec.modules.decoder.latent_diffusion.modules.diffusionmodules.util
 
 from semanticodec.modules.decoder.latent_diffusion.models.ddim import DDIMSampler
 from semanticodec.modules.decoder.latent_diffusion.util import get_unconditional_condition, disabled_train
+from semanticodec.utils import PositionalEncoding
 
 
 class DDPM(pl.LightningModule):
@@ -87,6 +88,7 @@ class DDPM(pl.LightningModule):
 
         self.logvar = torch.full(fill_value=logvar_init, size=(self.num_timesteps,))
         self.logvar = nn.Parameter(self.logvar, requires_grad=False)
+        self.pos_embed = PositionalEncoding(seq_length=512, embedding_dim=192)
 
     def register_schedule(
         self,
@@ -463,6 +465,12 @@ class LatentDiffusion(DDPM):
         unconditional_conditioning=None,
     ):
         batch_size = quanized_feature.shape[0]
+        
+        pe = self.pos_embed(quanized_feature)
+        quanized_feature = torch.cat(
+            [quanized_feature, pe.repeat(quanized_feature.size(0), 1, 1).to(quanized_feature.device)],
+            dim=-1,
+        )
         c = {"crossattn_audiomae_pooled": [
             quanized_feature,
             torch.ones((quanized_feature.size(0), quanized_feature.size(1)))
@@ -512,6 +520,8 @@ def extract_state_dict(checkpoint_path):
     new_state_dict = {}
     for key in state_dict.keys():
         if "cond_stage_models.0" in key:
+            if "pos_embed.pe" in key:
+                continue
             new_key_name = key.replace("cond_stage_models.0.","")
             new_state_dict[new_key_name] = state_dict[key]
     return new_state_dict
@@ -520,28 +530,36 @@ def test_512():
     import yaml
     from semanticodec.modules.encoder.encoder import AudioMAEConditionQuantResEncoder
 
+    # Encoder
     checkpoint_path = "pretrained/semanticcodec_512.ckpt"
-    waveform, sr = torchaudio.load("KzvdKLdBw3s.wav")
-    mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
-    assert mel.shape == (1, 1024, 128)
-    
     audiomaequant = AudioMAEConditionQuantResEncoder(feature_dimension=768, codebook_size=8192, use_positional_embedding=True, lstm_layer=4, lstm_bidirectional=True).cuda()
     state_dict = extract_state_dict(checkpoint_path)
     audiomaequant.load_state_dict(state_dict)
 
-    output = audiomaequant(mel.cuda())
-    condition = output["crossattn_audiomae_pooled"][0] # Use this feature for HEAR evaluation
-
-    print("Get condition success", condition.shape)
-
+    # Decoder
     config_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/config.yaml"
     config_yaml = yaml.load(open(config_path, "r"), Loader=yaml.FullLoader)
     latent_diffusion = instantiate_from_config(config_yaml["model"]).cuda()
     checkpoint = torch.load("pretrained/semanticcodec_512.ckpt")["state_dict"]
     checkpoint = {k:v for k,v in checkpoint.items() if "clap" not in k and "loss" not in k and "cond_stage" not in k}
     latent_diffusion.load_state_dict(checkpoint)
-    waveform = latent_diffusion.generate_sample(condition, ddim_steps=25)
-    sf.write("test.wav", waveform[0,0], 16000)
+
+    # Encoding and decoding
+    testaudiopath = "/mnt/bn/lqhaoheliu/hhl_script2/2024/SemanticCodec/build_evaluation_set/evaluationset_16k"
+    output_save_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/output_512_step50_scale35"
+    os.makedirs(output_save_path, exist_ok=True)
+
+    filelist = os.listdir(testaudiopath)
+    for file in filelist:
+        filepath = os.path.join(testaudiopath, file)
+        waveform, sr = torchaudio.load(filepath)
+        mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
+        assert mel.shape == (1, 1024, 128)
+        output = audiomaequant(mel.cuda())
+        tokens = output["tokens"]
+        condition = audiomaequant.token_to_quantized_feature(tokens)
+        waveform = latent_diffusion.generate_sample(condition, ddim_steps=50, unconditional_guidance_scale=3.5)
+        sf.write(os.path.join(output_save_path, file), waveform[0,0], 16000)
 
 if __name__ == "__main__":
     test_512()
