@@ -1,0 +1,420 @@
+import torch
+import math
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+from semanticodec.modules.audiomae.AudioMAE import Vanilla_AudioMAE
+from vector_quantize_pytorch import VectorQuantize
+from vector_quantize_pytorch import ResidualVQ
+from semanticodec.utils import concat_1x2, concat_2x2, PositionalEncoding, extract_kaldi_fbank_feature
+import torchaudio
+
+class AudioMAEConditionQuantResEncoder(nn.Module):
+    def __init__(
+        self,
+        centroid_npy_path=None,
+        feature_dimension=768,
+        codebook_size=2048,
+        codebook_dim=None,
+        use_cosine_sim=False,
+        decay=0.9,
+        residual_encoder="lstm",
+        lstm_layer = 2,
+        lstm_bidirectional=False,
+        commitment_weight=1.0,
+        rvq_layers=0,
+        use_oracle=False,
+        use_positional_embedding=True,
+    ):
+        super().__init__()
+        self.use_oracle = use_oracle
+        self.use_positional_embedding = use_positional_embedding
+        self.residual_encoder = residual_encoder
+        self.downsampling_rate = feature_dimension // 768
+        self.feature_dimension = feature_dimension
+        self.device = None
+        self.pos_embed = PositionalEncoding(seq_length=512, embedding_dim=192)
+        
+
+        if centroid_npy_path is None:
+            # raise ValueError("centroid_npy_path is required")
+            if self.downsampling_rate == 1:
+                centroid_npy_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/pretrained/codebook_idx/combine_512_audioset_dominate/codebook_16384_0.npy"
+            elif self.downsampling_rate == 2:
+                centroid_npy_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/pretrained/codebook_idx/combine_256_audioset_dominate/codebook_16384_0.npy"
+            elif self.downsampling_rate == 4:
+                centroid_npy_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/pretrained/codebook_idx/combine_128_audioset_dominate/codebook_16384_0.npy"
+            else:
+                raise ValueError("Invalid downsampling rate %s" % self.downsampling_rate)
+        
+        self.centroid_npy = torch.from_numpy(np.load(centroid_npy_path))
+
+        self.centroid_npy.requires_grad = False
+        self.audiomae = Vanilla_AudioMAE()
+        self.audiomae.eval()
+        for p in self.audiomae.parameters():
+            p.requires_grad = False
+        
+        self.no_audiomae_mask = True
+        self.no_audiomae_average = False
+
+        if self.residual_encoder == "lstm":
+            self.encoder = nn.LSTM(
+                input_size=feature_dimension * 2,
+                hidden_size=feature_dimension * 2,
+                num_layers=lstm_layer,
+                bias=True,
+                batch_first=True,
+                bidirectional=lstm_bidirectional,
+            )
+        else:
+            raise ValueError("Invalid model name %s" % self.residual_encoder)
+
+        self.encoder_output_linear = nn.Linear(
+            in_features=feature_dimension * 2 if not lstm_bidirectional else feature_dimension * 4,
+            out_features=feature_dimension,
+            bias=False,
+        )
+
+        print(
+            "Vector Quantization with %s. Commit loss weight %s. Decay %s"
+            % (codebook_size, commitment_weight, decay)
+        )
+        self.rvq_layers = rvq_layers
+        self.codebook_size = codebook_size
+        if rvq_layers <= 0:
+            self.quantizer = VectorQuantize(
+                dim=feature_dimension,
+                codebook_size=codebook_size,
+                decay=decay,
+                commitment_weight=commitment_weight,
+                codebook_dim = codebook_dim,
+                use_cosine_sim = use_cosine_sim
+            )
+        else:
+            print("Use Residual Vector Quantization")
+            self.quantizer = ResidualVQ(
+                dim=feature_dimension,
+                num_quantizers=rvq_layers,  # specify number of quantizers
+                codebook_size=codebook_size,  # codebook size
+            )
+
+        self.indices_statistic_count = 0
+        self.indices_statistic = {}
+
+    # Required
+    def get_unconditional_condition(self, batchsize):
+        param = next(self.audiomae.parameters())
+        assert param.requires_grad == False
+        device = param.device
+        token_num = 512
+        representation_quant = torch.zeros((batchsize, token_num, 768)).to(device).float()
+        if self.use_positional_embedding:
+            pe = self.pos_embed(representation_quant)
+            representation_quant = torch.cat([representation_quant, pe.repeat(batchsize, 1, 1)], dim=-1)
+        return [representation_quant, torch.ones((batchsize, token_num)).to(device).float()]
+
+    def quant_mem_efficient(self, representation, first_token_removed=False, feature_dim=768):
+        assert representation.size(-1) % 768 == 0
+        # Removing the first token and keeping the shape as [batch_size, seq_length - 1, 768] for clarity
+        
+        if not first_token_removed:
+            representation = representation[:, 1:, :]  # Shape: [batch_size, seq_length - 1, 768]
+
+        # Compute squared norms of each row in representation
+        norm_rep = representation.pow(2).sum(dim=2, keepdim=True)  # Shape: [batch_size, seq_length - 1, 1]
+
+        # Compute squared norms of centroids
+        norm_cent = self.centroid_npy.pow(2).sum(dim=1, keepdim=True)  # Shape: [2048, 1]
+
+        # Compute dot products
+        # Reshape representation for batch matrix multiplication: [batch_size * (seq_length - 1), 768]
+        rep_flat = representation.reshape(-1, feature_dim)
+        # Dot product, need to transpose centroids: [batch_size * (seq_length - 1), 2048]
+        dot_product = torch.mm(rep_flat, self.centroid_npy.t())
+        dot_product = dot_product.reshape(representation.shape[0], representation.shape[1], -1)  # Reshape back
+
+        # Compute L2 distance using the formula: ||a-b||^2 = ||a||^2 + ||b||^2 - 2*a.b
+        distances = norm_rep + norm_cent.t() - 2 * dot_product  # Correct broadcasting
+
+        # Find the index of the closest centroid for each vector
+        _, tokens = torch.min(distances, dim=2)  # Shape: [batch_size, seq_length - 1]
+
+        return tokens
+
+    def unquant(self, tokens):
+        """
+        Project the quantized tokens into continuous representation with self.centroid_npy.
+        Args:
+            tokens (torch.Tensor): The quantized tokens, shape [batch_size, seq_length - 1]
+        Returns:
+            torch.Tensor: The continuous representation, shape [batch_size, seq_length - 1, feature_dim]
+        """
+        return F.embedding(tokens, self.centroid_npy)  # Shape: [batch_size, seq_length - 1, 768]
+
+
+    def indices_utilization_statistic(self, indices):
+        # indices shape: [batchsize, 256, self.rvq_layers], values are integer codebook indices
+        if indices.dim() == 2:
+            indices = indices.unsqueeze(-1)
+
+        # Update statistics with current indices
+        batch_size, _, rvq_layers = indices.shape
+
+        # Initialize the statistic data structure if not already done
+        if not self.indices_statistic:
+            # Create a list of dictionaries, one for each RVQ layer
+            self.indices_statistic = [{} for _ in range(rvq_layers)]
+
+        # Process each RVQ layer separately
+        for layer in range(rvq_layers):
+            layer_indices = (
+                indices[:, :, layer].view(-1).cpu().tolist()
+            )  # Flatten and convert to list for easy counting
+            for idx in layer_indices:
+                if idx in self.indices_statistic[layer]:
+                    self.indices_statistic[layer][idx] += 1
+                else:
+                    self.indices_statistic[layer][idx] = 1
+
+        # Update count and possibly calculate statistics
+        if self.indices_statistic_count % 10000 == 0:
+            # Calculate and print statistics for each codebook
+            for layer, stats in enumerate(self.indices_statistic):
+                utilization_rate = len(list(stats.keys())) / self.codebook_size
+                utilizations = list(stats.values())
+                print(
+                    f"\n\nLayer {layer} Utilization Rate: {utilization_rate}",
+                    "max utilization",
+                    {max(utilizations)},
+                    "min utilization",
+                    {min(utilizations)},
+                    "std",
+                    np.std(utilizations),
+                    "median",
+                    np.median(utilizations),
+                    "\n\n",
+                )
+                metrics = {
+                    f"codec/{layer}_utilization": utilization_rate,
+                    f"codec/{layer}_utilization_max": max(utilizations),
+                    f"codec/{layer}_utilization_min": min(utilizations),
+                    f"codec/{layer}_utilization_std": np.std(utilizations),
+                    f"codec/{layer}_utilization_median": np.median(utilizations),
+                }
+                print("\n")
+                print(metrics)
+                print("\n")
+
+            self.indices_statistic = [{} for _ in range(rvq_layers)]
+            self.indices_statistic_count = 0
+
+        self.indices_statistic_count += 1
+
+    def concate(self, representation):
+        assert representation.size(-1) == 768
+        representation = representation[:, 1:, :].transpose(1, 2)
+        bs, embedding_dim, token_num = representation.size()
+        representation = representation.reshape(bs, embedding_dim, 64, 8).permute(
+            0, 2, 3, 1
+        )
+        if self.downsampling_rate == 2:
+            concatenated = concat_1x2(representation)
+        elif self.downsampling_rate == 4:
+            concatenated = concat_2x2(representation)
+        else:
+            raise ValueError("Invalid downsampling rate %s" % self.downsampling_rate)
+        return concatenated  # [bs, token_num, embedding_dim]
+
+    def get_unconditional_condition(self, batchsize):
+        param = next(self.audiomae.parameters())
+        assert param.requires_grad == False
+        device = param.device
+        token_num = 512 // self.downsampling_rate
+        representation_quant = (
+            torch.zeros((batchsize, token_num, self.feature_dimension))
+            .to(device)
+            .float()
+        )
+        if self.use_positional_embedding:
+            pe = self.pos_embed(representation_quant)
+            if not self.use_oracle:
+                representation_quant = torch.cat(
+                    [
+                        representation_quant,
+                        representation_quant,
+                        pe.repeat(batchsize, 1, 1),
+                    ],
+                    dim=-1,
+                )
+            else:
+                representation_quant = torch.cat(
+                    [representation_quant, pe.repeat(batchsize, 1, 1)],
+                    dim=-1,
+                )
+        return self.wrap_return_dict(
+            crossattn_audiomae_pooled=[
+                representation_quant,
+                torch.ones((batchsize, token_num)).to(device).float(),
+            ],
+            commit_loss=torch.zeros((1,)).to(device),
+        )
+
+    def forward(self, batch):
+        assert batch.size(-2) == 1024 and batch.size(-1) == 128
+
+        if self.device is None:
+            self.device = batch.device
+            self.centroid_npy = self.centroid_npy.to(self.device)
+
+        batch = batch.unsqueeze(1)
+
+        with torch.no_grad():
+            # [bs, 513, 768]
+            representation = self.audiomae(
+                batch,
+                no_mask=self.no_audiomae_mask,
+                no_average=self.no_audiomae_average,
+            )
+
+            if self.downsampling_rate != 1:
+                representation = self.concate(representation)
+                representation = (
+                    representation.permute(0, 3, 1, 2).flatten(2).permute(0, 2, 1)
+                )
+            else:
+                representation = representation[:, 1:, :]
+
+        if not self.use_oracle:
+            # Quantize the audiomae representation to tokens
+            tokens = self.quant_mem_efficient(
+                representation,
+                first_token_removed=True,
+                feature_dim=self.feature_dimension,
+            )
+
+            # Change the token back to the representations, which information losed
+            representation_quant = self.unquant(tokens)
+            audiomae_feature_after_quant = representation_quant.clone()
+            representation_quant_stack_unquant = torch.cat(
+                [representation, representation_quant], dim=-1
+            )
+
+            # Use the encoder to extract extra information for conditioning
+            if self.residual_encoder == "transformer":
+                representation_residual = self.encoder(
+                    representation_quant_stack_unquant.permute(0, 2, 1)
+                ).permute(0, 2, 1)
+            elif self.residual_encoder == "lstm" or self.residual_encoder == "mamba" or self.residual_encoder == "ResidualLSTM":
+                representation_residual = self.encoder(
+                    representation_quant_stack_unquant
+                )
+
+            # If you use LSTM as encoder
+            if type(representation_residual) == tuple:
+                representation_residual = representation_residual[0]
+
+            representation_residual = self.encoder_output_linear(
+                representation_residual
+            )
+            representation_residual_quant, indices, commit_loss = self.quantizer(
+                representation_residual
+            )
+
+            # do stastistic of the indices here using indices_utilization_statistic
+            if torch.rand(1).item() < 0.01:
+                print(indices[0], representation_residual_quant)
+
+            representation_quant = torch.cat(
+                [representation_residual_quant, representation_quant], dim=-1
+            )
+        else:
+            # Oracle
+            param = next(self.audiomae.parameters())
+            assert param.requires_grad == False
+            device = param.device
+
+            if torch.rand(1).item() < 0.01:
+                print("Use Oracle")
+
+            commit_loss = torch.zeros((1,)).to(device)
+
+            representation_quant = torch.cat([representation], dim=-1)
+
+        if self.use_positional_embedding:
+            pe = self.pos_embed(representation_quant)
+            representation_quant = torch.cat(
+                [representation_quant, pe.repeat(representation_quant.size(0), 1, 1)],
+                dim=-1,
+            )
+
+        return self.wrap_return_dict(
+            crossattn_audiomae_pooled=[
+                representation_quant,
+                torch.ones((representation_quant.size(0), representation_quant.size(1)))
+                .to(representation_quant.device)
+                .float(),
+            ],
+            commit_loss=commit_loss,
+            audiomae_feature_after_quant=audiomae_feature_after_quant,
+        )
+
+    def wrap_return_dict(self, crossattn_audiomae_pooled, commit_loss, audiomae_feature_after_quant):
+        return {
+            "crossattn_audiomae_pooled": crossattn_audiomae_pooled,
+            "loss_noncond_commit_loss": commit_loss.mean(),
+            "audiomae_feature_after_quant": audiomae_feature_after_quant,
+        }
+
+
+if __name__ == "__main__":
+    def extract_state_dict(checkpoint_path):
+        state_dict = torch.load(checkpoint_path)["state_dict"]
+        new_state_dict = {}
+        for key in state_dict.keys():
+            if "cond_stage_models.0" in key:
+                new_key_name = key.replace("cond_stage_models.0.","")
+                new_state_dict[new_key_name] = state_dict[key]
+        return new_state_dict
+    
+    # The 1.45 kbps checkpoint
+    checkpoint_path = "pretrained/semanticcodec_512.ckpt"
+    audiomaequant = AudioMAEConditionQuantResEncoder(feature_dimension=768, codebook_size=8192, use_positional_embedding=True, lstm_layer=4, lstm_bidirectional=True).cuda()
+    state_dict = extract_state_dict(checkpoint_path)
+    audiomaequant.load_state_dict(state_dict)
+    waveform, sr = torchaudio.load("KzvdKLdBw3s.wav")
+    mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
+    assert mel.shape == (1, 1024, 128)
+    output = audiomaequant(mel.cuda())
+    assert output["audiomae_feature_after_quant"].shape == (1, 512, 768), output["audiomae_feature_after_quant"].shape # the first VQ layer feature
+    output = output["crossattn_audiomae_pooled"][0] # Use this feature for HEAR evaluation
+    assert output.shape == (1, 512, 1536) == output.shape
+
+    # The 0.71 kbps checkpoint
+    checkpoint_path = "pretrained/semanticcodec_256.ckpt"
+    audiomaequant = AudioMAEConditionQuantResEncoder(feature_dimension=768*2, codebook_size=8192, use_positional_embedding=False, lstm_layer=3, lstm_bidirectional=True).cuda()
+    state_dict = extract_state_dict(checkpoint_path)
+    audiomaequant.load_state_dict(state_dict)
+    waveform, sr = torchaudio.load("KzvdKLdBw3s.wav")
+    mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
+    assert mel.shape == (1, 1024, 128)
+    output = audiomaequant(mel.cuda())
+    assert output["audiomae_feature_after_quant"].shape == (1, 256, 768*2)
+    output = output["crossattn_audiomae_pooled"][0] # Use this feature for HEAR evaluation
+    assert output.shape == (1, 256, 1536*2), output.shape
+    
+
+    # The 0.35 kbps checkpoint
+    checkpoint_path = "pretrained/semanticcodec_128.ckpt"
+    audiomaequant = AudioMAEConditionQuantResEncoder(feature_dimension=768*4, codebook_size=8192, use_positional_embedding=False, lstm_layer=2, lstm_bidirectional=True).cuda()
+    state_dict = extract_state_dict(checkpoint_path)
+    audiomaequant.load_state_dict(state_dict)
+    waveform, sr = torchaudio.load("KzvdKLdBw3s.wav")
+    mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
+    assert mel.shape == (1, 1024, 128)
+    output = audiomaequant(mel.cuda())
+    assert output["audiomae_feature_after_quant"].shape == (1, 128, 768*4)
+    output = output["crossattn_audiomae_pooled"][0] # Use this feature for HEAR evaluation
+    assert output.shape == (1, 128, 1536*4), output.shape
+    
+    
