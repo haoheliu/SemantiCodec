@@ -42,7 +42,6 @@ model:
     base_learning_rate: 1.0e-4
     warmup_steps: 5000 # TODO more
     sampling_rate: 16000
-    batchsize: 24
     linear_start: 0.0015
     linear_end: 0.0195
     num_timesteps_cond: 1
@@ -54,7 +53,6 @@ model:
     latent_t_size: 256 # TODO might need to change
     latent_f_size: 16
     channels: 8 # TODO might need to change
-    monitor: val/loss_simple_ema
     scale_by_std: true
     unet_config:
       target: semanticodec.modules.decoder.latent_diffusion.modules.diffusionmodules.openaimodel.UNetModel
