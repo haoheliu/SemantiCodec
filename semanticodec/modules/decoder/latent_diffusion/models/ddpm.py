@@ -45,6 +45,7 @@ from semanticodec.modules.decoder.latent_diffusion.modules.diffusionmodules.util
 
 from semanticodec.modules.decoder.latent_diffusion.models.ddim import DDIMSampler
 from semanticodec.modules.decoder.latent_diffusion.models.plms import PLMSSampler
+from semanticodec.modules.decoder.latent_diffusion.util import get_unconditional_condition
 import soundfile as sf
 import os
 
@@ -588,17 +589,6 @@ class DDPM(pl.LightningModule):
         for key in self.cond_stage_model_metadata.keys():
             metadata = self.cond_stage_model_metadata[key]
             model_idx, cond_stage_key, conditioning_key = metadata["model_idx"], metadata["cond_stage_key"], metadata["conditioning_key"]
-
-            # If we use CLAP as condition, we might use audio for training, but we also must use text for evaluation
-            if(isinstance(self.cond_stage_models[model_idx], CLAPAudioEmbeddingClassifierFreev2)):
-                self.cond_stage_model_metadata[key]["cond_stage_key_orig"] = self.cond_stage_model_metadata[key]["cond_stage_key"]
-                self.cond_stage_model_metadata[key]["embed_mode_orig"] = self.cond_stage_models[model_idx].embed_mode
-                if(torch.randn(1).item() < 0.5):
-                    self.cond_stage_model_metadata[key]["cond_stage_key"] = "text"
-                    self.cond_stage_models[model_idx].embed_mode = "text"
-                else:
-                    self.cond_stage_model_metadata[key]["cond_stage_key"] = "waveform"
-                    self.cond_stage_models[model_idx].embed_mode = "audio"
 
     def on_validation_epoch_start(self) -> None:
         # Use text as condition during validation
@@ -1561,89 +1551,41 @@ class LatentDiffusion(DDPM):
     @torch.no_grad()
     def generate_sample(
         self,
-        batchs,
+        quanized_feature,
         ddim_steps=200,
         ddim_eta=1.0,
         x_T=None,
-        n_gen=1,
         unconditional_guidance_scale=1.0,
         unconditional_conditioning=None,
-        name=None,
-        use_plms=False,
-        limit_num=None,
-        **kwargs,
     ):
-        # Generate n_gen times and select the best
-        # Batch: audio, text, fnames
-        assert x_T is None
-        try:
-            batchs = iter(batchs)
-        except TypeError:
-            raise ValueError("The first input argument should be an iterable object")
+        batch_size = quanized_feature.shape[0]
+        c = {"crossattn_audiomae_pooled": [
+            quanized_feature,
+            torch.ones((quanized_feature.size(0), quanized_feature.size(1)))
+                .to(quanized_feature.device)
+                .float(),
+        ]}
 
-        if use_plms:
-            assert ddim_steps is not None
+        unconditional_conditioning = {}
+        if unconditional_guidance_scale != 1.0:
+            unconditional_conditioning["crossattn_audiomae_pooled"] = get_unconditional_condition(batch_size, downsampling_rate=1, device="cuda")
+        
+        samples, _ = self.sample_log(
+            cond=c,
+            batch_size=batch_size,
+            x_T=x_T,
+            ddim=True,
+            ddim_steps=ddim_steps,
+            eta=ddim_eta,
+            unconditional_guidance_scale=unconditional_guidance_scale,
+            unconditional_conditioning=unconditional_conditioning
+        )
 
-        use_ddim = ddim_steps is not None
+        mel = self.decode_first_stage(samples)
 
-        with self.ema_scope("Plotting"):
-            for i, batch in enumerate(batchs):
-                z, c = self.get_input(
-                    batch,
-                    self.first_stage_key, 
-                    unconditional_prob_cfg=0.0 # Do not output unconditional information in the c
-                )
-
-                if limit_num is not None and i * z.size(0) > limit_num:
-                    break
-                
-                c = self.filter_useful_cond_dict(c)
-
-                text = super().get_input(batch, "text")
-
-                # Generate multiple samples
-                batch_size = len(text) * n_gen
-
-                # Generate multiple samples at a time and filter out the best
-                # The condition to the diffusion wrapper can have many format
-                for cond_key in c.keys():   
-                    if(isinstance(c[cond_key], list)):
-                        for i in range(len(c[cond_key])):
-                            c[cond_key][i] = torch.cat([c[cond_key][i]] * n_gen, dim=0)        
-                    elif(isinstance(c[cond_key], dict)):
-                        for k in c[cond_key].keys():
-                            c[cond_key][k] = torch.cat([c[cond_key][k]] * n_gen, dim=0)   
-                    else:
-                        c[cond_key] = torch.cat([c[cond_key]] * n_gen, dim=0)
-                
-                text = text * n_gen
-
-                if unconditional_guidance_scale != 1.0:
-                    unconditional_conditioning = {}
-                    for key in self.cond_stage_model_metadata:
-                        model_idx = self.cond_stage_model_metadata[key]["model_idx"]
-                        unconditional_conditioning[key] = self.cond_stage_models[model_idx].get_unconditional_condition(batch_size)
-
-                fnames = list(super().get_input(batch, "fname"))
-                
-                samples, _ = self.sample_log(
-                    cond=c,
-                    batch_size=batch_size,
-                    x_T=x_T,
-                    ddim=use_ddim,
-                    ddim_steps=ddim_steps,
-                    eta=ddim_eta,
-                    unconditional_guidance_scale=unconditional_guidance_scale,
-                    unconditional_conditioning=unconditional_conditioning,
-                    use_plms=use_plms,
-                )
-
-                mel = self.decode_first_stage(samples)
-
-                waveform = self.mel_spectrogram_to_waveform(
-                    mel, savepath=".", bs=None, name=fnames, save=True
-                )
-                import ipdb; ipdb.set_trace()
+        waveform = self.mel_spectrogram_to_waveform(
+            mel, savepath=".", bs=None, save=True
+        )
 
 class DiffusionWrapper(pl.LightningModule):
     def __init__(self, diff_model_config, conditioning_key):
@@ -1663,7 +1605,6 @@ class DiffusionWrapper(pl.LightningModule):
     def forward(
         self, x, t, cond_dict: dict={}
     ):
-
         x = x.contiguous()
         t = t.contiguous()
 
@@ -1707,28 +1648,13 @@ class DiffusionWrapper(pl.LightningModule):
 
 if __name__ == "__main__":
     import yaml
-    from semanticodec.utils import concat_1x2, concat_2x2, PositionalEncoding, extract_kaldi_fbank_feature
-    import torchaudio
 
-    waveform, sr = torchaudio.load("KzvdKLdBw3s.wav")
-    mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
-    assert mel.shape == (1, 1024, 128)
-
-    batch = {
-        "ta_kaldi_fbank": mel,
-        "text": ["test"],
-        "fname": ["testfilename"],
-    }
+    condition = torch.from_numpy(np.load("/mnt/bn/lqhaoheliu/project/SemantiCodec/cond.npy")).cuda()
 
     config_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/config.yaml"
     config_yaml = yaml.load(open(config_path, "r"), Loader=yaml.FullLoader)
     latent_diffusion = instantiate_from_config(config_yaml["model"]).cuda()
-    checkpoint = torch.load("/mnt/bn/lqhaoheliu/project/SemantiCodec/pretrained/semanticcodec_512.ckpt")
-    checkpoint checkpoint["state_dict"]
+    checkpoint = torch.load("/mnt/bn/lqhaoheliu/project/SemantiCodec/pretrained/semanticcodec_512.ckpt")["state_dict"]
     checkpoint = {k:v for k,v in checkpoint.items() if "clap" not in k and "loss" not in k}
     latent_diffusion.load_state_dict(checkpoint)
-    import ipdb; ipdb.set_trace()
-    
-    latent_diffusion.generate_sample([batch], name="test", ddim_steps=25)
-
-    import ipdb; ipdb.set_trace()
+    latent_diffusion.generate_sample(condition, ddim_steps=25)
