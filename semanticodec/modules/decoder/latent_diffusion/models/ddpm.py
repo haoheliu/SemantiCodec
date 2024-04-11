@@ -603,8 +603,14 @@ def test_512_long():
 
     filelist = os.listdir(testaudiopath)
     for file in filelist:
+        if os.path.exists(os.path.join(output_save_path, file)):
+            continue
         filepath = os.path.join(testaudiopath, file)
         waveform, sr = torchaudio.load(filepath)
+        # resample to 16000
+        if sr != 16000:
+            waveform = torchaudio.functional.resample(waveform, sr, 16000)
+            sr = 16000
         original_duration = waveform.shape[1] / sr
         # This is to pad the audio to the multiplication of 0.16 seconds so that the original audio can be reconstructed
         original_duration = original_duration + (0.16 - original_duration % 0.16)
