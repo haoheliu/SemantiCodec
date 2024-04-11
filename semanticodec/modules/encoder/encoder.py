@@ -260,7 +260,52 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
             commit_loss=torch.zeros((1,)).to(device),
         )
 
+    def long_token_split_window(self, tokens, window_length=512, overlap = 0.0625):
+        # Overlap 0.64 seconds
+        # batch: [batchsize, token_length, embedding_dimension]
+        # Split into segments with overlap
+        _, token_length, _ = tokens.size()
+        overlap = int(window_length * overlap)
+        current_start = 0
+        token_window_list = []
+        while current_start + window_length < token_length:
+            current_batch = tokens[:, current_start:current_start + window_length, :]
+            token_window_list.append(current_batch)
+            current_start += window_length - overlap
+        
+        remaining_batch = tokens[:, current_start:, :]
+
+        if remaining_batch.size(-2) > 0:
+            # Pad to window length
+            remaining_batch = F.pad(remaining_batch, (0, 0, 0, window_length - remaining_batch.size(-2), 0, 0))
+            token_window_list.append(remaining_batch)
+        return token_window_list
+        
     def forward(self, batch):
+        # Perform padding before this function
+        # Trim the audio token after this function
+        assert batch.size(-1) == 128 and batch.size(-2) % 1024 == 0
+        if self.device is None:
+            self.device = batch.device
+            self.centroid_npy = self.centroid_npy.to(self.device)
+
+        window_length = 1024
+        current_start = 0
+        total_length_batch = batch.size(-2)
+
+        tokens_list = []
+        quantized_feature_list = []
+        while current_start + window_length <= total_length_batch:
+            current_batch = batch[:, current_start:current_start + window_length, :]
+            with torch.no_grad():
+                # [bs, 513, 768]
+                output = self._forward(current_batch)
+                tokens_list.append(output["tokens"])
+                quantized_feature_list.append(output["quantized_feature"])
+            current_start += window_length
+        return torch.cat(tokens_list, dim=1)
+
+    def _forward(self, batch):
         assert batch.size(-2) == 1024 and batch.size(-1) == 128
 
         if self.device is None:
@@ -348,8 +393,7 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
                 .to(representation_quant.device)
                 .float(),
             ],
-            tokens = tokens,
-            audiomae_feature_after_quant=audiomae_feature_after_quant,
+            tokens = tokens
         )
 
     def token_to_quantized_feature(self, tokens):
@@ -360,11 +404,10 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
                 [acoustic_feature, semantic_feature], dim=-1
             )
 
-    def wrap_return_dict(self, crossattn_audiomae_pooled, tokens, audiomae_feature_after_quant):
+    def wrap_return_dict(self, crossattn_audiomae_pooled, tokens):
         return {
             "quantized_feature": crossattn_audiomae_pooled,
-            "tokens": tokens,
-            "semantic_feature": audiomae_feature_after_quant,
+            "tokens": tokens
         }
 
 
@@ -374,6 +417,8 @@ if __name__ == "__main__":
         new_state_dict = {}
         for key in state_dict.keys():
             if "cond_stage_models.0" in key:
+                if "pos_embed.pe" in key:
+                    continue
                 new_key_name = key.replace("cond_stage_models.0.","")
                 new_state_dict[new_key_name] = state_dict[key]
         return new_state_dict
@@ -383,7 +428,7 @@ if __name__ == "__main__":
     audiomaequant = AudioMAEConditionQuantResEncoder(feature_dimension=768, codebook_size=8192, use_positional_embedding=True, lstm_layer=4, lstm_bidirectional=True).cuda()
     state_dict = extract_state_dict(checkpoint_path)
     audiomaequant.load_state_dict(state_dict)
-    waveform, sr = torchaudio.load("KzvdKLdBw3s.wav")
+    waveform, sr = torchaudio.load("/mnt/bn/lqhaoheliu/project/SemantiCodec/output_512/audioset_Y_oeM7Osk7DI.wav")
     mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
     assert mel.shape == (1, 1024, 128)
     output = audiomaequant(mel.cuda())

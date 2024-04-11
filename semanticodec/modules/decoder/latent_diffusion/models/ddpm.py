@@ -2,7 +2,7 @@
 import sys
 sys.path.append("/mnt/bn/lqhaoheliu/project/SemantiCodec/semanticodec/modules/decoder") # TODO remove this
 import os
-
+import math
 import torch
 import torch.nn as nn
 import numpy as np
@@ -30,7 +30,6 @@ from semanticodec.modules.decoder.latent_diffusion.modules.diffusionmodules.util
 from semanticodec.modules.decoder.latent_diffusion.models.ddim import DDIMSampler
 from semanticodec.modules.decoder.latent_diffusion.util import get_unconditional_condition, disabled_train
 from semanticodec.utils import PositionalEncoding
-
 
 class DDPM(pl.LightningModule):
     # classic DDPM with Gaussian diffusion, in image space
@@ -462,28 +461,37 @@ class LatentDiffusion(DDPM):
         ddim_eta=1.0,
         x_T=None,
         unconditional_guidance_scale=1.0,
-        unconditional_conditioning=None,
     ):
         batch_size = quanized_feature.shape[0]
         
         pe = self.pos_embed(quanized_feature)
+
+        unconditional_conditioning = {}
+        if unconditional_guidance_scale != 1.0:
+            unconditional_quanized_feature = torch.cat(
+                [quanized_feature * 0.0, pe.repeat(quanized_feature.size(0), 1, 1).to(quanized_feature.device)],
+                dim=-1,
+            )
+            unconditional_conditioning = {"crossattn_audiomae_pooled": [
+                unconditional_quanized_feature,
+                torch.ones((unconditional_quanized_feature.size(0), unconditional_quanized_feature.size(1)))
+                    .to(unconditional_quanized_feature.device)
+                    .float(),
+            ]}
+
         quanized_feature = torch.cat(
             [quanized_feature, pe.repeat(quanized_feature.size(0), 1, 1).to(quanized_feature.device)],
             dim=-1,
         )
-        c = {"crossattn_audiomae_pooled": [
+        condition = {"crossattn_audiomae_pooled": [
             quanized_feature,
             torch.ones((quanized_feature.size(0), quanized_feature.size(1)))
                 .to(quanized_feature.device)
                 .float(),
         ]}
-
-        unconditional_conditioning = {}
-        if unconditional_guidance_scale != 1.0:
-            unconditional_conditioning["crossattn_audiomae_pooled"] = get_unconditional_condition(batch_size, downsampling_rate=1, device="cuda")
-        
+ 
         samples, _ = self.sample_log(
-            cond=c,
+            cond=condition,
             batch_size=batch_size,
             x_T=x_T,
             ddim=True,
@@ -526,40 +534,108 @@ def extract_state_dict(checkpoint_path):
             new_state_dict[new_key_name] = state_dict[key]
     return new_state_dict
 
-def test_512():
+def overlap_add_waveform(windowed_waveforms, overlap_duration = 0.64):
+    """
+    Concatenates a series of windowed waveforms with overlap, applying fade-in and fade-out effects to the overlaps.
+    
+    Parameters:
+    - windowed_waveforms: a list of numpy arrays with shape (1, 1, samples_per_waveform)
+    
+    Returns:
+    - A single waveform numpy array resulting from the overlap-add process.
+    """
+    # Assuming a sampling rate of 16000 Hz and 0.64 seconds overlap
+    if overlap_duration < 1e-4:
+        return np.concatenate(windowed_waveforms, axis=-1)
+        
+    sampling_rate = 16000
+    overlap_samples = int(overlap_duration * sampling_rate)
+    
+    # Initialize the output waveform
+    output_waveform = np.array([]).reshape(1, 1, -1)
+    
+    for i, waveform in enumerate(windowed_waveforms):
+        # If not the first waveform, apply fade-in at the beginning
+        if i > 0:
+            fade_in = np.linspace(0, 1, overlap_samples).reshape(1, 1, -1)
+            waveform[:, :, :overlap_samples] *= fade_in
+        
+        # If output waveform already has content, apply fade-out to its last overlap and add the overlapping parts
+        if output_waveform.size > 0:
+            fade_out = np.linspace(1, 0, overlap_samples).reshape(1, 1, -1)
+            # Apply fade-out to the end of the output waveform
+            output_waveform[:, :, -overlap_samples:] *= fade_out
+            # Add the faded-in start of the current waveform to the faded-out end of the output waveform
+            output_waveform[:, :, -overlap_samples:] += waveform[:, :, :overlap_samples]
+        
+        # Concatenate the current waveform (minus the initial overlap if not the first) to the output
+        if output_waveform.size == 0:
+            output_waveform = waveform
+        else:
+            output_waveform = np.concatenate((output_waveform, waveform[:, :, overlap_samples:]), axis=2)
+    
+    return output_waveform
+
+def test_512_long():
     import yaml
     from semanticodec.modules.encoder.encoder import AudioMAEConditionQuantResEncoder
 
     # Encoder
     checkpoint_path = "pretrained/semanticcodec_512.ckpt"
-    audiomaequant = AudioMAEConditionQuantResEncoder(feature_dimension=768, codebook_size=8192, use_positional_embedding=True, lstm_layer=4, lstm_bidirectional=True).cuda()
+    semanticodec_encoder = AudioMAEConditionQuantResEncoder(feature_dimension=768, codebook_size=8192, use_positional_embedding=True, lstm_layer=4, lstm_bidirectional=True).cuda()
     state_dict = extract_state_dict(checkpoint_path)
-    audiomaequant.load_state_dict(state_dict)
+    semanticodec_encoder.load_state_dict(state_dict)
 
     # Decoder
     config_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/config.yaml"
     config_yaml = yaml.load(open(config_path, "r"), Loader=yaml.FullLoader)
-    latent_diffusion = instantiate_from_config(config_yaml["model"]).cuda()
+    semanticodec_decoder = instantiate_from_config(config_yaml["model"]).cuda()
     checkpoint = torch.load("pretrained/semanticcodec_512.ckpt")["state_dict"]
     checkpoint = {k:v for k,v in checkpoint.items() if "clap" not in k and "loss" not in k and "cond_stage" not in k}
-    latent_diffusion.load_state_dict(checkpoint)
+    semanticodec_decoder.load_state_dict(checkpoint)
 
     # Encoding and decoding
-    testaudiopath = "/mnt/bn/lqhaoheliu/hhl_script2/2024/SemanticCodec/build_evaluation_set/evaluationset_16k"
-    output_save_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/output_512_step50_scale35"
+    # testaudiopath = "/mnt/bn/lqhaoheliu/hhl_script2/2024/SemanticCodec/build_evaluation_set/evaluationset_16k"
+    # output_save_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/output_long_audio_50_2_0"
+    testaudiopath = "/mnt/bn/lqhaoheliu/project/SemantiCodec/long_audio"
+    output_save_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/long_audio_output"
     os.makedirs(output_save_path, exist_ok=True)
 
     filelist = os.listdir(testaudiopath)
     for file in filelist:
         filepath = os.path.join(testaudiopath, file)
         waveform, sr = torchaudio.load(filepath)
-        mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
-        assert mel.shape == (1, 1024, 128)
-        output = audiomaequant(mel.cuda())
-        tokens = output["tokens"]
-        condition = audiomaequant.token_to_quantized_feature(tokens)
-        waveform = latent_diffusion.generate_sample(condition, ddim_steps=50, unconditional_guidance_scale=3.5)
-        sf.write(os.path.join(output_save_path, file), waveform[0,0], 16000)
+        original_duration = waveform.shape[1] / sr
+        # This is to pad the audio to the multiplication of 0.16 seconds so that the original audio can be reconstructed
+        original_duration = original_duration + (0.16 - original_duration % 0.16)
+        # Calculate the token length in theory
+        target_token_len = 8 * original_duration / 0.16
+        segment_sample_length = int(16000 * 10.24)
+        # Pad audio to the multiplication of 10.24 seconds for easier segmentations
+        if waveform.shape[1] % segment_sample_length < segment_sample_length:
+            waveform = torch.cat([waveform, torch.zeros(1, int(segment_sample_length - waveform.shape[1] % segment_sample_length))], dim=1)
+        mel_target_length = 1024 * int(waveform.shape[1] / segment_sample_length)
+        # Calculate the mel spectrogram
+        mel = extract_kaldi_fbank_feature(waveform, sr, target_length=mel_target_length)["ta_kaldi_fbank"].unsqueeze(0)
+        mel = mel.squeeze(1)
+        assert mel.shape[-1] == 128 and mel.shape[-2] % 1024 == 0
+        # Calculate token
+        tokens = semanticodec_encoder(mel.cuda())
+        # After ceiling, the output may include some padding silence in the end, which can be trimmed
+        tokens = tokens[:,:math.ceil(target_token_len),:]
+        # Split the token into windows
+        windowed_token_list = semanticodec_encoder.long_token_split_window(tokens, overlap=0.0625)
+        windowed_waveform = []
+        for id_, windowed_token in enumerate(windowed_token_list):
+            condition = semanticodec_encoder.token_to_quantized_feature(windowed_token)
+            waveform = semanticodec_decoder.generate_sample(condition, ddim_steps=50, unconditional_guidance_scale=2.0)
+            sf.write(os.path.join(output_save_path, str(id_)+"_"+file), waveform[0,0], 16000)
+            windowed_waveform.append(waveform)
+        output = overlap_add_waveform(windowed_waveform, overlap_duration=0.64)
+        # Each patch step equal 16 mel time frames, which have 0.01 second
+        trim_duration = (tokens.shape[1] / 8) * 16 * 0.01
+        output = output[...,:int(trim_duration * 16000)]
+        sf.write(os.path.join(output_save_path, file), output[0,0], 16000)
 
 if __name__ == "__main__":
-    test_512()
+    test_512_long()

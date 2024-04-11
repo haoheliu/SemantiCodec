@@ -18,19 +18,10 @@ def disabled_train(self, mode=True):
     does not change anymore."""
     return self
 
-def get_unconditional_condition(self, batchsize, downsampling_rate, device):
+def get_unconditional_condition(batchsize, downsampling_rate, device):
     token_num = 512 // downsampling_rate
-    representation_quant = (
-        torch.zeros((batchsize, token_num, self.feature_dimension))
-        .to(device)
-        .float()
-    )
-    return {
-        "crossattn_audiomae_pooled": [
-            representation_quant,
-            torch.ones((batchsize, token_num)).to(device).float(),
-        ]
-    }
+    representation_quant = torch.zeros((batchsize, token_num, 768 * downsampling_rate)).to(device).float()
+    return [representation_quant, torch.ones((batchsize, token_num)).to(device).float()]
 
 def log_txt_as_img(wh, xc, size=10):
     # wh a tuple of (width, height)

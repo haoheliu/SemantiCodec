@@ -3,3 +3,5 @@ pretrained
 *.wav
 g_*
 *.pyc
+*.pkl
+*.json
