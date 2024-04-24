@@ -595,10 +595,8 @@ def test_512_long():
     semanticodec_decoder.load_state_dict(checkpoint)
 
     # Encoding and decoding
-    # testaudiopath = "/mnt/bn/lqhaoheliu/hhl_script2/2024/SemanticCodec/build_evaluation_set/evaluationset_16k"
-    # output_save_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/output_long_audio_50_2_0"
-    testaudiopath = "/mnt/bn/lqhaoheliu/project/SemantiCodec/long_audio"
-    output_save_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/long_audio_output"
+    testaudiopath = "/mnt/bn/lqhaoheliu/hhl_script2/2024/SemanticCodec/build_evaluation_set/evaluationset_16k"
+    output_save_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/output_long_audio_50_2_0"
     os.makedirs(output_save_path, exist_ok=True)
 
     filelist = os.listdir(testaudiopath)
@@ -643,5 +641,220 @@ def test_512_long():
         output = output[...,:int(trim_duration * 16000)]
         sf.write(os.path.join(output_save_path, file), output[0,0], 16000)
 
+
+def test_512_checkpoint():
+    import yaml
+    from semanticodec.modules.encoder.encoder import AudioMAEConditionQuantResEncoder
+
+    # Encoder
+    checkpoint_path_list = [
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_512_rand_centroid/checkpoint-fad-133.00-global_step=744999.ckpt",
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_512_rand_centroid/checkpoint-fad-133.00-global_step=969999.ckpt",
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_512_rand_centroid/checkpoint-fad-133.00-global_step=1029999.ckpt",
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_512_rand_centroid/checkpoint-fad-133.00-global_step=1139999.ckpt",
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_512_rand_centroid/checkpoint-fad-133.00-global_step=1239999.ckpt"
+    ]
+    for checkpoint_path in checkpoint_path_list:
+        semanticodec_encoder = AudioMAEConditionQuantResEncoder(feature_dimension=768, codebook_size=8192, use_positional_embedding=True, lstm_layer=4, lstm_bidirectional=True).cuda()
+        state_dict = extract_state_dict(checkpoint_path)
+        semanticodec_encoder.load_state_dict(state_dict)
+
+        # Decoder
+        config_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/config.yaml"
+        config_yaml = yaml.load(open(config_path, "r"), Loader=yaml.FullLoader)
+        semanticodec_decoder = instantiate_from_config(config_yaml["model"]).cuda()
+        checkpoint = torch.load(checkpoint_path)["state_dict"]
+        checkpoint = {k:v for k,v in checkpoint.items() if "clap" not in k and "loss" not in k and "cond_stage" not in k}
+        semanticodec_decoder.load_state_dict(checkpoint)
+
+        # Encoding and decoding
+        testaudiopath = "/mnt/bn/lqhaoheliu/hhl_script2/2024/SemanticCodec/build_evaluation_set/evaluationset_16k"
+        output_save_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/output_%s" % os.path.basename(checkpoint_path).replace(".ckpt","")
+        os.makedirs(output_save_path, exist_ok=True)
+
+        filelist = os.listdir(testaudiopath)
+        for file in filelist:
+            if os.path.exists(os.path.join(output_save_path, file)):
+                continue
+            filepath = os.path.join(testaudiopath, file)
+            waveform, sr = torchaudio.load(filepath)
+            # resample to 16000
+            if sr != 16000:
+                waveform = torchaudio.functional.resample(waveform, sr, 16000)
+                sr = 16000
+            original_duration = waveform.shape[1] / sr
+            # This is to pad the audio to the multiplication of 0.16 seconds so that the original audio can be reconstructed
+            original_duration = original_duration + (0.16 - original_duration % 0.16)
+            # Calculate the token length in theory
+            target_token_len = 8 * original_duration / 0.16
+            segment_sample_length = int(16000 * 10.24)
+            # Pad audio to the multiplication of 10.24 seconds for easier segmentations
+            if waveform.shape[1] % segment_sample_length < segment_sample_length:
+                waveform = torch.cat([waveform, torch.zeros(1, int(segment_sample_length - waveform.shape[1] % segment_sample_length))], dim=1)
+            mel_target_length = 1024 * int(waveform.shape[1] / segment_sample_length)
+            # Calculate the mel spectrogram
+            mel = extract_kaldi_fbank_feature(waveform, sr, target_length=mel_target_length)["ta_kaldi_fbank"].unsqueeze(0)
+            mel = mel.squeeze(1)
+            assert mel.shape[-1] == 128 and mel.shape[-2] % 1024 == 0
+            # Calculate token
+            tokens = semanticodec_encoder(mel.cuda())
+            # After ceiling, the output may include some padding silence in the end, which can be trimmed
+            tokens = tokens[:,:math.ceil(target_token_len),:]
+            # Split the token into windows
+            windowed_token_list = semanticodec_encoder.long_token_split_window(tokens, overlap=0.0625)
+            windowed_waveform = []
+            for id_, windowed_token in enumerate(windowed_token_list):
+                condition = semanticodec_encoder.token_to_quantized_feature(windowed_token)
+                waveform = semanticodec_decoder.generate_sample(condition, ddim_steps=50, unconditional_guidance_scale=2.0)
+                # sf.write(os.path.join(output_save_path, str(id_)+"_"+file), waveform[0,0], 16000)
+                windowed_waveform.append(waveform)
+            output = overlap_add_waveform(windowed_waveform, overlap_duration=0.64)
+            # Each patch step equal 16 mel time frames, which have 0.01 second
+            trim_duration = (tokens.shape[1] / 8) * 16 * 0.01
+            output = output[...,:int(trim_duration * 16000)]
+            sf.write(os.path.join(output_save_path, file), output[0,0], 16000)
+
+def test_256_checkpoint():
+    import yaml
+    from semanticodec.modules.encoder.encoder import AudioMAEConditionQuantResEncoder
+
+    # Encoder
+    checkpoint_path_list = [
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_256_rand_centroid/checkpoint-fad-133.00-global_step=854999.ckpt",
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_256_rand_centroid/checkpoint-fad-133.00-global_step=909999.ckpt",
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_256_rand_centroid/checkpoint-fad-133.00-global_step=1009999.ckpt",
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_256_rand_centroid/checkpoint-fad-133.00-global_step=1099999.ckpt"
+    ]
+    for checkpoint_path in checkpoint_path_list:
+        semanticodec_encoder = AudioMAEConditionQuantResEncoder(feature_dimension=768*2, codebook_size=8192, use_positional_embedding=True, lstm_layer=3, lstm_bidirectional=True).cuda()
+        state_dict = extract_state_dict(checkpoint_path)
+        semanticodec_encoder.load_state_dict(state_dict)
+
+        # Decoder
+        config_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/config_256.yaml"
+        config_yaml = yaml.load(open(config_path, "r"), Loader=yaml.FullLoader)
+        semanticodec_decoder = instantiate_from_config(config_yaml["model"]).cuda()
+        checkpoint = torch.load(checkpoint_path)["state_dict"]
+        checkpoint = {k:v for k,v in checkpoint.items() if "clap" not in k and "loss" not in k and "cond_stage" not in k}
+        semanticodec_decoder.load_state_dict(checkpoint)
+
+        # Encoding and decoding
+        testaudiopath = "/mnt/bn/lqhaoheliu/hhl_script2/2024/SemanticCodec/build_evaluation_set/evaluationset_16k"
+        output_save_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/output_%s" % os.path.basename(checkpoint_path).replace(".ckpt","")
+        os.makedirs(output_save_path, exist_ok=True)
+
+        filelist = os.listdir(testaudiopath)
+        for file in filelist:
+            if os.path.exists(os.path.join(output_save_path, file)):
+                continue
+            filepath = os.path.join(testaudiopath, file)
+            waveform, sr = torchaudio.load(filepath)
+            # resample to 16000
+            if sr != 16000:
+                waveform = torchaudio.functional.resample(waveform, sr, 16000)
+                sr = 16000
+            original_duration = waveform.shape[1] / sr
+            # This is to pad the audio to the multiplication of 0.16 seconds so that the original audio can be reconstructed
+            original_duration = original_duration + (0.16 - original_duration % 0.16)
+            # Calculate the token length in theory
+            target_token_len = 4 * original_duration / 0.16
+            segment_sample_length = int(16000 * 10.24)
+            # Pad audio to the multiplication of 10.24 seconds for easier segmentations
+            if waveform.shape[1] % segment_sample_length < segment_sample_length:
+                waveform = torch.cat([waveform, torch.zeros(1, int(segment_sample_length - waveform.shape[1] % segment_sample_length))], dim=1)
+            mel_target_length = 1024 * int(waveform.shape[1] / segment_sample_length)
+            # Calculate the mel spectrogram
+            mel = extract_kaldi_fbank_feature(waveform, sr, target_length=mel_target_length)["ta_kaldi_fbank"].unsqueeze(0)
+            mel = mel.squeeze(1)
+            assert mel.shape[-1] == 128 and mel.shape[-2] % 1024 == 0
+            # Calculate token
+            tokens = semanticodec_encoder(mel.cuda())
+            # After ceiling, the output may include some padding silence in the end, which can be trimmed
+            tokens = tokens[:,:math.ceil(target_token_len),:]
+            # Split the token into windows
+            windowed_token_list = semanticodec_encoder.long_token_split_window(tokens, window_length=256, overlap=0.0625)
+            windowed_waveform = []
+            for id_, windowed_token in enumerate(windowed_token_list):
+                condition = semanticodec_encoder.token_to_quantized_feature(windowed_token)
+                waveform = semanticodec_decoder.generate_sample(condition, ddim_steps=50, unconditional_guidance_scale=2.0)
+                # sf.write(os.path.join(output_save_path, str(id_)+"_"+file), waveform[0,0], 16000)
+                windowed_waveform.append(waveform)
+            output = overlap_add_waveform(windowed_waveform, overlap_duration=0.64)
+            # Each patch step equal 16 mel time frames, which have 0.01 second
+            trim_duration = (tokens.shape[1] / 4) * 16 * 0.01
+            output = output[...,:int(trim_duration * 16000)]
+            sf.write(os.path.join(output_save_path, file), output[0,0], 16000)
+
+def test_128_checkpoint():
+    import yaml
+    from semanticodec.modules.encoder.encoder import AudioMAEConditionQuantResEncoder
+
+    # Encoder
+    checkpoint_path_list = [
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_128_rand_centroid/checkpoint-fad-133.00-global_step=649999.ckpt",
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_128_rand_centroid/checkpoint-fad-133.00-global_step=699999.ckpt",
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_128_rand_centroid/checkpoint-fad-133.00-global_step=789999.ckpt",
+        "/mnt/bn/lqhaoheliu/project/audio_generation_diffusion/log/latent_diffusion/41_final_model/2024_04_11_lstm_bidirectional_128_rand_centroid/checkpoint-fad-133.00-global_step=864999.ckpt"
+    ]
+    for checkpoint_path in checkpoint_path_list:
+        semanticodec_encoder = AudioMAEConditionQuantResEncoder(feature_dimension=768*4, codebook_size=8192, use_positional_embedding=True, lstm_layer=2, lstm_bidirectional=True).cuda()
+        state_dict = extract_state_dict(checkpoint_path)
+        semanticodec_encoder.load_state_dict(state_dict)
+
+        # Decoder
+        config_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/config_128.yaml"
+        config_yaml = yaml.load(open(config_path, "r"), Loader=yaml.FullLoader)
+        semanticodec_decoder = instantiate_from_config(config_yaml["model"]).cuda()
+        checkpoint = torch.load(checkpoint_path)["state_dict"]
+        checkpoint = {k:v for k,v in checkpoint.items() if "clap" not in k and "loss" not in k and "cond_stage" not in k}
+        semanticodec_decoder.load_state_dict(checkpoint)
+
+        # Encoding and decoding
+        testaudiopath = "/mnt/bn/lqhaoheliu/hhl_script2/2024/SemanticCodec/build_evaluation_set/evaluationset_16k"
+        output_save_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/output_%s" % os.path.basename(checkpoint_path).replace(".ckpt","")
+        os.makedirs(output_save_path, exist_ok=True)
+
+        filelist = os.listdir(testaudiopath)
+        for file in filelist:
+            if os.path.exists(os.path.join(output_save_path, file)):
+                continue
+            filepath = os.path.join(testaudiopath, file)
+            waveform, sr = torchaudio.load(filepath)
+            # resample to 16000
+            if sr != 16000:
+                waveform = torchaudio.functional.resample(waveform, sr, 16000)
+                sr = 16000
+            original_duration = waveform.shape[1] / sr
+            # This is to pad the audio to the multiplication of 0.16 seconds so that the original audio can be reconstructed
+            original_duration = original_duration + (0.16 - original_duration % 0.16)
+            # Calculate the token length in theory
+            target_token_len = 4 * original_duration / 0.16
+            segment_sample_length = int(16000 * 10.24)
+            # Pad audio to the multiplication of 10.24 seconds for easier segmentations
+            if waveform.shape[1] % segment_sample_length < segment_sample_length:
+                waveform = torch.cat([waveform, torch.zeros(1, int(segment_sample_length - waveform.shape[1] % segment_sample_length))], dim=1)
+            mel_target_length = 1024 * int(waveform.shape[1] / segment_sample_length)
+            # Calculate the mel spectrogram
+            mel = extract_kaldi_fbank_feature(waveform, sr, target_length=mel_target_length)["ta_kaldi_fbank"].unsqueeze(0)
+            mel = mel.squeeze(1)
+            assert mel.shape[-1] == 128 and mel.shape[-2] % 1024 == 0
+            # Calculate token
+            tokens = semanticodec_encoder(mel.cuda())
+            # After ceiling, the output may include some padding silence in the end, which can be trimmed
+            tokens = tokens[:,:math.ceil(target_token_len),:]
+            # Split the token into windows
+            windowed_token_list = semanticodec_encoder.long_token_split_window(tokens, window_length=128, overlap=0.0625)
+            windowed_waveform = []
+            for id_, windowed_token in enumerate(windowed_token_list):
+                condition = semanticodec_encoder.token_to_quantized_feature(windowed_token)
+                waveform = semanticodec_decoder.generate_sample(condition, ddim_steps=50, unconditional_guidance_scale=2.0)
+                # sf.write(os.path.join(output_save_path, str(id_)+"_"+file), waveform[0,0], 16000)
+                windowed_waveform.append(waveform)
+            output = overlap_add_waveform(windowed_waveform, overlap_duration=0.64)
+            # Each patch step equal 16 mel time frames, which have 0.01 second
+            trim_duration = (tokens.shape[1] / 2) * 16 * 0.01
+            output = output[...,:int(trim_duration * 16000)]
+            sf.write(os.path.join(output_save_path, file), output[0,0], 16000)
+
 if __name__ == "__main__":
-    test_512_long()
+    test_128_checkpoint()

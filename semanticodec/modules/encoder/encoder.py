@@ -399,7 +399,9 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
     def token_to_quantized_feature(self, tokens):
         semantic_tokens, acoustic_tokens = tokens[...,0], tokens[...,1]
         semantic_feature = self.unquant(semantic_tokens)
-        acoustic_feature = self.quantizer.get_output_from_indices(acoustic_tokens).reshape(1, 512, 768)
+        print(semantic_feature.shape)
+        token_num, feature_dim = semantic_feature.shape[-2], semantic_feature.shape[-1]
+        acoustic_feature = self.quantizer.get_output_from_indices(acoustic_tokens).reshape(1, token_num, feature_dim)
         return torch.cat(
                 [acoustic_feature, semantic_feature], dim=-1
             )
