@@ -33,7 +33,7 @@
       border-top: 1px solid #ccc; 
     }
     .table td{
-      border: none
+      border: solid 3px #ccc;
     }
     .table-container {
       overflow-x: auto;
@@ -99,6 +99,47 @@
       width: 400px; /* 设置视频宽度 */
       /* height: 360px; 设置视频高度 */
       }
+    }
+    table tr td:nth-child(3), 
+    table tr th:nth-child(3) {
+      background-color: #ADD8E6;
+    }
+    table tr td:nth-child(5), 
+    table tr th:nth-child(5) {
+      background-color: #ADD8E6;
+    }
+    table tr td:nth-child(4), 
+    table tr th:nth-child(4) {
+      background-color: #6bd4ae;
+    }
+    table tr td:nth-child(6), 
+    table tr th:nth-child(6) {
+      background-color: #bf77de;
+    }
+    table tr td:nth-child(8), 
+    table tr th:nth-child(8) {
+      background-color: #bf77de;
+    }
+    table tr td:nth-child(10), 
+    table tr th:nth-child(10) {
+      background-color: #bf77de;
+    }
+    table tr td:nth-child(7), 
+    table tr th:nth-child(7) {
+      background-color: #f36b2c;
+    }
+    table tr td:nth-child(9), 
+    table tr th:nth-child(9) {
+      background-color: #f36b2c;
+    }
+    table tr td:nth-child(11), 
+    table tr th:nth-child(11) {
+      background-color: #f36b2c;
+    }
+    table {
+      border: 1px solid black;
+      text-align: center; /* Center-align text */
+      padding: 8px; /* Add some padding for aesthetics */
     }
   </style>
   <title>SemantiCodec: An Ultra Low Bitrate Semantic Audio Codec for General Sound</title>
@@ -204,9 +245,18 @@
 
             <br></br>
             <h2 id="section_3">
-              <font color="000093">Demon 1 Waveform Reconstruction</font>
+              <font color="000093">Waveform Reconstruction</font>
             </h2>
-            <h3>General Audio (Audioset)</h3>
+            <p>
+              <font color="061E61">✅ We provide the original and the reconstructed audio samples of Encodec (3.0, 1.5 kbps), HiFi-Codec (2.0 kbps), Descript codec (1.41, 0.78, 0.47 kbps), and proposed SemantiCodec (1.43, 0.71, 0.35 kbps).
+              </font>
+            </p>
+            <p>
+              <font color="061E61">✅ We show the evaluation metrics score using ViSQOL, Word Error Rate (WER), and classification accuracy. 
+              </font>
+            </p>
+
+            <!-- <h3>General Audio (Audioset)</h3> -->
             <!-- <p><b>
                 <font color="061E61">Short Samples:</font>
               </b></p> -->
@@ -214,2024 +264,976 @@
             <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
               <thead>
                 <tr>
-                  <th scope="col" width="265px">
-                    <font color="061E61">Ground-Truth</font>
+                  <th scope="col" width="180px" style="background-color: #FFD700;">
+                    <font color="061E61">ID</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_0.35k</font>
+                  <th scope="col" width="325px" style="background-color: #FFD700;">
+                    <font color="061E61">Original</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_0.71k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">Encodec</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_1.43k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">HiFi-Codec</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">Encodec</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">DAC</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">SemantiCodec</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">DAC</font>
+                  </th>
+
+                  <th scope="col" width="325px">
+                    <font color="061E61">SemantiCodec</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">DAC</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">SemantiCodec</font>
                   </th>
                 </tr>
-              </thead>
-              <tbody>
-                <tr>  <!-- ori_num1  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/audioset_Y-xfgovG6-KU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/audioset_Y-xfgovG6-KU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_71_kbps/audioset_Y-xfgovG6-KU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/audioset_Y-xfgovG6-KU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr>  <!-- ori_num2  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/audioset_Y-XwtCzUaN1I.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/audioset_Y-XwtCzUaN1I.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_71_kbps/audioset_Y-XwtCzUaN1I.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/audioset_Y-XwtCzUaN1I.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr> <!-- ori_num3  -->
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/groundtruth/audioset_Y-yTHDQZL1dE.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_0_35_kbps/audioset_Y-yTHDQZL1dE.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_0_71_kbps/audioset_Y-yTHDQZL1dE.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_1_43_kbps/audioset_Y-yTHDQZL1dE.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-              </tr>
-              </tbody>
-            </table>
-            <div id="accordion">
-              <div class="card">
-                <div class="card-header" id="headingOne">
-                  <h5 class="mb-0">
-                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
-                      &#x1F449; Click to fold/unfold more examples.
-                    </button>
-                  </h5>
-                </div>
-            
-                <div id="collapseThree" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-                  <div class="card-body">
-                    <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-                      <thead>
-                        <tr>
-                          <th scope="col" width="265px">
-                            <font color="061E61">Ground-Truth</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_0.35k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_0.71k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_1.43k</font>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr><!-- extra_num1  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/audioset_YVDN86t0gca0.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/audioset_YVDN86t0gca0.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_71_kbps/audioset_YVDN86t0gca0.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/audioset_YVDN86t0gca0.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num2  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/audioset_Yw_z9oSn-eIM.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/audioset_Yw_z9oSn-eIM.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_71_kbps/audioset_Yw_z9oSn-eIM.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/audioset_Yw_z9oSn-eIM.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num3  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/audioset_YWVfrcJWnOXs.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/audioset_YWVfrcJWnOXs.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_71_kbps/audioset_YWVfrcJWnOXs.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/audioset_YWVfrcJWnOXs.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num4  -->
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/groundtruth/audioset_YWvZ_wamj6NA.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_0_35_kbps/audioset_YWvZ_wamj6NA.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_0_71_kbps/audioset_YWvZ_wamj6NA.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_1_43_kbps/audioset_YWvZ_wamj6NA.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                      </tr>
-                      <tr><!-- extra_num5  -->
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/groundtruth/audioset_YwW6_-K4FT4Y.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_0_35_kbps/audioset_YwW6_-K4FT4Y.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_0_71_kbps/audioset_YwW6_-K4FT4Y.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_1_43_kbps/audioset_YwW6_-K4FT4Y.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                    </tr>
-                    <tr><!-- extra_num6  -->
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/groundtruth/audioset_YwwNIm8bgzKc.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_0_35_kbps/audioset_YwwNIm8bgzKc.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_0_71_kbps/audioset_YwwNIm8bgzKc.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_1_43_kbps/audioset_YwwNIm8bgzKc.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                  </tr>
-                  <tr><!-- extra_num7  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/audioset_Ywy5edFMFcyM.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/audioset_Ywy5edFMFcyM.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_71_kbps/audioset_Ywy5edFMFcyM.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/audioset_Ywy5edFMFcyM.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <br></br>
-            <h3>Speech (Libritts)</h3>
-            <!-- <p><b>
-                <font color="061E61">Short Samples:</font>
-              </b></p> -->
-            <div class = "table-container">
-            <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-              <thead>
                 <tr>
-                  <th scope="col" width="265px">
-                    <font color="061E61">Ground-Truth</font>
+                  <th scope="col" width="180px">
+                    <font color="061E61">Bit rate</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_0.35k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">/</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_0.71k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.0 kbps</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_1.43k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">2.0 kbps</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">1.5 kbps</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">1.41 kbps</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">1.43 kbps</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">0.78 kbps</font>
+                  </th>
+
+                  <th scope="col" width="325px">
+                    <font color="061E61">0.71 kbps</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">0.47 kbps</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">0.35 kbps</font>
                   </th>
                 </tr>
-              </thead>
-              <tbody>
-                <tr>  <!-- ori_num1  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/libritts_121_127105_000044_000001.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/libritts_121_127105_000044_000001.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_71_kbps/libritts_121_127105_000044_000001.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/libritts_121_127105_000044_000001.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr>  <!-- ori_num2  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/libritts_237_134493_000006_000002.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/libritts_237_134493_000006_000002.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_71_kbps/libritts_237_134493_000006_000002.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/libritts_237_134493_000006_000002.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr> <!-- ori_num3  -->
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/groundtruth/libritts_260_123440_000014_000002.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_0_35_kbps/libritts_260_123440_000014_000002.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_0_71_kbps/libritts_260_123440_000014_000002.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_1_43_kbps/libritts_260_123440_000014_000002.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-              </tr>
-              </tbody>
-            </table>
-            <div id="accordion">
-              <div class="card">
-                <div class="card-header" id="headingOne">
-                  <h5 class="mb-0">
-                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
-                      &#x1F449; Click to fold/unfold more examples.
-                    </button>
-                  </h5>
-                </div>
-            
-                <div id="collapseThree" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-                  <div class="card-body">
-                    <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-                      <thead>
-                        <tr>
-                          <th scope="col" width="265px">
-                            <font color="061E61">Ground-Truth</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_0.35k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_0.71k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_1.43k</font>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr><!-- extra_num1  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/libritts_260_123440_000015_000000.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/libritts_260_123440_000015_000000.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_71_kbps/libritts_260_123440_000015_000000.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/libritts_260_123440_000015_000000.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num2  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/libritts_1089_134686_000009_000006.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/libritts_1089_134686_000009_000006.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_71_kbps/libritts_1089_134686_000009_000006.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/libritts_1089_134686_000009_000006.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num3  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/libritts_1320_122612_000046_000000.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/libritts_1320_122612_000046_000000.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_71_kbps/libritts_1320_122612_000046_000000.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/libritts_1320_122612_000046_000000.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num4  -->
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/groundtruth/libritts_2300_131720_000038_000002.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_0_35_kbps/libritts_2300_131720_000038_000002.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_0_71_kbps/libritts_2300_131720_000038_000002.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_1_43_kbps/libritts_2300_131720_000038_000002.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                      </tr>
-                      <tr><!-- extra_num5  -->
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/groundtruth/libritts_2300_131720_000041_000001.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_0_35_kbps/libritts_2300_131720_000041_000001.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_0_71_kbps/libritts_2300_131720_000041_000001.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_1_43_kbps/libritts_2300_131720_000041_000001.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                    </tr>
-                    <tr><!-- extra_num6  -->
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/groundtruth/libritts_2961_961_000020_000002.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_0_35_kbps/libritts_2961_961_000020_000002.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_0_71_kbps/libritts_2961_961_000020_000002.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_1_43_kbps/libritts_2961_961_000020_000002.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                  </tr>
-                  <tr><!-- extra_num7  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/libritts_3570_5694_000014_000012.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/libritts_3570_5694_000014_000012.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_71_kbps/libritts_3570_5694_000014_000012.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/libritts_3570_5694_000014_000012.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <br></br>
-            <h3>Music (MUSDB) </h3>
-            <!-- <p><b>
-                <font color="061E61">Short Samples:</font>
-              </b></p> -->
-            <div class = "table-container">
-            <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-              <thead>
                 <tr>
-                  <th scope="col" width="265px">
-                    <font color="061E61">Ground-Truth</font>
+                  <th scope="col" width="180px">
+                    <font color="061E61">ViSQOL ↑</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_0.35k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">/</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_0.71k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.82</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_1.43k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.57</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.33</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.13</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.81</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">2.82</font>
+                  </th>
+
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.55</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">2.39</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.17</font>
                   </th>
                 </tr>
-              </thead>
-              <tbody>
-                <tr>  <!-- ori_num1  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/musdb_6vocals.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/musdb_6vocals.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_71_kbps/musdb_6vocals.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/musdb_6vocals.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr>  <!-- ori_num2  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/musdb_30bass.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/musdb_30bass.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_71_kbps/musdb_30bass.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/musdb_30bass.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr> <!-- ori_num3  -->
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/groundtruth/musdb_33other.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_0_35_kbps/musdb_33other.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_0_71_kbps/musdb_33other.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_1_43_kbps/musdb_33other.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-              </tr>
-              </tbody>
-            </table>
-            <div id="accordion">
-              <div class="card">
-                <div class="card-header" id="headingOne">
-                  <h5 class="mb-0">
-                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
-                      &#x1F449; Click to fold/unfold more examples.
-                    </button>
-                  </h5>
-                </div>
-            
-                <div id="collapseThree" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-                  <div class="card-body">
-                    <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-                      <thead>
-                        <tr>
-                          <th scope="col" width="265px">
-                            <font color="061E61">Ground-Truth</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_0.35k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_0.71k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_1.43k</font>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr><!-- extra_num1  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/musdb_34bass.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/musdb_34bass.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_71_kbps/musdb_34bass.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/musdb_34bass.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num2  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/musdb_91other.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/musdb_91other.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_71_kbps/musdb_91other.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/musdb_91other.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num3  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/musdb_109vocals.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/musdb_109vocals.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_71_kbps/musdb_109vocals.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/musdb_109vocals.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num4  -->
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/groundtruth/musdb_114mixture.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_0_35_kbps/musdb_114mixture.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_0_71_kbps/musdb_114mixture.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_1_43_kbps/musdb_114mixture.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                      </tr>
-                      <tr><!-- extra_num5  -->
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/groundtruth/musdb_115drums.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_0_35_kbps/musdb_115drums.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_0_71_kbps/musdb_115drums.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_1_43_kbps/musdb_115drums.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                    </tr>
-                    <tr><!-- extra_num6  -->
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/groundtruth/musdb_119vocals.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_0_35_kbps/musdb_119vocals.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_0_71_kbps/musdb_119vocals.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_1_43_kbps/musdb_119vocals.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                  </tr>
-                  <tr><!-- extra_num7  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/musdb_123mixture.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/musdb_123mixture.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_71_kbps/musdb_123mixture.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/musdb_123mixture.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <br></br>
-            <h2 id="section_3">
-              <font color="000093">Demon 2 Comparision with Baseline Models</font>
-            </h2>
-            <h3>General Audio (Audioset)</h3>
-            <!-- <p><b>
-                <font color="061E61">Short Samples:</font>
-              </b></p> -->
-            <div class = "table-container">
-            <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-              <thead>
                 <tr>
-                  <th scope="col" width="265px">
-                    <font color="061E61">Ground-Truth</font>
+                  <th scope="col" width="180px">
+                    <font color="061E61">WER (%)↓</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_0.35k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">/</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_1.43k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.7</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">DescriptCodec_1.41k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.6</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">EnCodec_1.5k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">5.0</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">HifiCodec_2k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">5.0</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">3.4</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">11.6</font>
+                  </th>
+
+                  <th scope="col" width="325px">
+                    <font color="061E61">5.1</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">28.2</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">19.6</font>
                   </th>
                 </tr>
-              </thead>
-              <tbody>
-                <tr>  <!-- ori_num1  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/audioset_YX7qFgrAl3OU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/audioset_YX7qFgrAl3OU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/audioset_YX7qFgrAl3OU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/descript_codec_1_41kbps/audioset_YX7qFgrAl3OU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/encodec_24k_1_5kbps/audioset_YX7qFgrAl3OU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/hifi-codec-2kbps/audioset_YX7qFgrAl3OU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr>  <!-- ori_num2  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/audioset_YXbY2H9lFMPU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/audioset_YXbY2H9lFMPU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/audioset_YXbY2H9lFMPU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/descript_codec_1_41kbps/audioset_YXbY2H9lFMPU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/encodec_24k_1_5kbps/audioset_YXbY2H9lFMPU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/hifi-codec-2kbps/audioset_YXbY2H9lFMPU.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr> <!-- ori_num3  -->
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/groundtruth/audioset_Yxerx967ziHA.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_0_35_kbps/audioset_Yxerx967ziHA.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_1_43_kbps/audioset_Yxerx967ziHA.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/descript_codec_1_41kbps/audioset_Yxerx967ziHA.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/encodec_24k_1_5kbps/audioset_Yxerx967ziHA.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/hifi-codec-2kbps/audioset_Yxerx967ziHA.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-              </tr>
-              </tbody>
-            </table>
-            <div id="accordion">
-              <div class="card">
-                <div class="card-header" id="headingOne">
-                  <h5 class="mb-0">
-                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
-                      &#x1F449; Click to fold/unfold more examples.
-                    </button>
-                  </h5>
-                </div>
-            
-                <div id="collapseThree" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-                  <div class="card-body">
-                    <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-                      <thead>
-                        <tr>
-                          <th scope="col" width="265px">
-                            <font color="061E61">Ground-Truth</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_0.35k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_1.43k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">DescriptCodec_1.41k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">EnCodec_1.5k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">HifiCodec_2k</font>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr><!-- extra_num1  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/audioset_YXEwSojR-Kbk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/audioset_YXEwSojR-Kbk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/audioset_YXEwSojR-Kbk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/descript_codec_1_41kbps/audioset_YXEwSojR-Kbk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/encodec_24k_1_5kbps/audioset_YXEwSojR-Kbk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/hifi-codec-2kbps/audioset_YXEwSojR-Kbk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num2  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/audioset_YXKNWjAq3xUk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/audioset_YXKNWjAq3xUk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/audioset_YXKNWjAq3xUk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/grounddescript_codec_1_41kbpstruth/audioset_YXKNWjAq3xUk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/encodec_24k_1_5kbps/audioset_YXKNWjAq3xUk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/hifi-codec-2kbps/audioset_YXKNWjAq3xUk.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num3  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/audioset_YxLQF7S41XLE.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/audioset_YxLQF7S41XLE.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/audioset_YxLQF7S41XLE.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/descript_codec_1_41kbps/audioset_YxLQF7S41XLE.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/encodec_24k_1_5kbps/audioset_YxLQF7S41XLE.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/hifi-codec-2kbps/audioset_YxLQF7S41XLE.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num4  -->
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/groundtruth/audioset_YxLZp-3_71Vs.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_0_35_kbps/audioset_YxLZp-3_71Vs.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_1_43_kbps/audioset_YxLZp-3_71Vs.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/descript_codec_1_41kbps/audioset_YxLZp-3_71Vs.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/encodec_24k_1_5kbps/audioset_YxLZp-3_71Vs.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/hifi-codec-2kbps/audioset_YxLZp-3_71Vs.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                      </tr>
-                      <tr><!-- extra_num5  -->
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/groundtruth/audioset_YxQCTXqu3tok.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_0_35_kbps/audioset_YxQCTXqu3tok.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_1_43_kbps/audioset_YxQCTXqu3tok.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/descript_codec_1_41kbps/audioset_YxQCTXqu3tok.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/encodec_24k_1_5kbps/audioset_YxQCTXqu3tok.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/hifi-codec-2kbps/audioset_YxQCTXqu3tok.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                    </tr>
-                    <tr><!-- extra_num6  -->
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/groundtruth/audioset_YxqjuiAkRkLw.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_0_35_kbps/audioset_YxqjuiAkRkLw.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_1_43_kbps/audioset_YxqjuiAkRkLw.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/descript_codec_1_41kbps/audioset_YxqjuiAkRkLw.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/encodec_24k_1_5kbps/audioset_YxqjuiAkRkLw.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/hifi-codec-2kbps/audioset_YxqjuiAkRkLw.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                  </tr>
-                  <tr><!-- extra_num7  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/audioset_YxqWpfNB7AzE.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/audioset_YxqWpfNB7AzE.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/audioset_YxqWpfNB7AzE.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/descript_codec_1_41kbps/audioset_YxqWpfNB7AzE.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/encodec_24k_1_5kbps/audioset_YxqWpfNB7AzE.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/hifi-codec-2kbps/audioset_YxqWpfNB7AzE.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <br></br>
-            <h3>Speech (Libritts)</h3>
-            <!-- <p><b>
-                <font color="061E61">Short Samples:</font>
-              </b></p> -->
-            <div class = "table-container">
-            <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-              <thead>
                 <tr>
-                  <th scope="col" width="265px">
-                    <font color="061E61">Ground-Truth</font>
+                  <th scope="col" width="180px">
+                    <font color="061E61">Accuracy (%)↑</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_0.35k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">/</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_1.43k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">37.0</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">DescriptCodec_1.41k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">40.3</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">EnCodec_1.5k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">35.5</font>
                   </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">HifiCodec_2k</font>
+                  <th scope="col" width="325px">
+                    <font color="061E61">43.5</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">52.5</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">43.0</font>
+                  </th>
+
+                  <th scope="col" width="325px">
+                    <font color="061E61">50.3</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">41.3</font>
+                  </th>
+                  <th scope="col" width="325px">
+                    <font color="061E61">46.1</font>
                   </th>
                 </tr>
               </thead>
+
               <tbody>
-                <tr>  <!-- ori_num1  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/libritts_3570_5694_000014_000015.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/libritts_3570_5694_000014_000015.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/libritts_3570_5694_000014_000015.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/descript_codec_1_41kbps/libritts_3570_5694_000014_000015.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/encodec_24k_1_5kbps/libritts_3570_5694_000014_000015.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/hifi-codec-2kbps/libritts_3570_5694_000014_000015.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr>  <!-- ori_num2  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/libritts_4507_16021_000033_000002.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/libritts_4507_16021_000033_000002.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/libritts_4507_16021_000033_000002.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/descript_codec_1_41kbps/libritts_4507_16021_000033_000002.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/encodec_24k_1_5kbps/libritts_4507_16021_000033_000002.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/hifi-codec-2kbps/libritts_4507_16021_000033_000002.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr> <!-- ori_num3  -->
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/groundtruth/libritts_4970_29095_000055_000002.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_0_35_kbps/libritts_4970_29095_000055_000002.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_1_43_kbps/libritts_4970_29095_000055_000002.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/descript_codec_1_41kbps/libritts_4970_29095_000055_000002.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/encodec_24k_1_5kbps/libritts_4970_29095_000055_000002.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-                  <td><audio controls="controls">
-                    <source
-                      src="audio/hifi-codec-2kbps/libritts_4970_29095_000055_000002.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
-              </tr>
-              </tbody>
-            </table>
-            <div id="accordion">
-              <div class="card">
-                <div class="card-header" id="headingOne">
-                  <h5 class="mb-0">
-                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
-                      &#x1F449; Click to fold/unfold more examples.
-                    </button>
-                  </h5>
-                </div>
-            
-                <div id="collapseThree" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-                  <div class="card-body">
-                    <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-                      <thead>
-                        <tr>
-                          <th scope="col" width="265px">
-                            <font color="061E61">Ground-Truth</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_0.35k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_1.43k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">DescriptCodec_1.41k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">EnCodec_1.5k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">HifiCodec_2k</font>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr><!-- extra_num1  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/libritts_4992_23283_000047_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/libritts_4992_23283_000047_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/libritts_4992_23283_000047_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/descript_codec_1_41kbps/libritts_4992_23283_000047_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/encodec_24k_1_5kbps/libritts_4992_23283_000047_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/hifi-codec-2kbps/libritts_4992_23283_000047_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num2  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/libritts_4992_41797_000017_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/libritts_4992_41797_000017_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/libritts_4992_41797_000017_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/descript_codec_1_41kbps/libritts_4992_41797_000017_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/encodec_24k_1_5kbps/libritts_4992_41797_000017_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/hifi-codec-2kbps/libritts_4992_41797_000017_000002.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num3  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/libritts_5639_40744_000012_000003.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/libritts_5639_40744_000012_000003.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/libritts_5639_40744_000012_000003.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/descript_codec_1_41kbps/libritts_5639_40744_000012_000003.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/encodec_24k_1_5kbps/libritts_5639_40744_000012_000003.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/hifi-codec-2kbps/libritts_5639_40744_000012_000003.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num4  -->
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/groundtruth/libritts_5639_40744_000014_000000.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_0_35_kbps/libritts_5639_40744_000014_000000.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_1_43_kbps/libritts_5639_40744_000014_000000.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/descript_codec_1_41kbps/libritts_5639_40744_000014_000000.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/encodec_24k_1_5kbps/libritts_5639_40744_000014_000000.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/hifi-codec-2kbps/libritts_5639_40744_000014_000000.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                      </tr>
-                      <tr><!-- extra_num5  -->
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/groundtruth/libritts_5683_32865_000009_000000.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_0_35_kbps/libritts_5683_32865_000009_000000.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_1_43_kbps/libritts_5683_32865_000009_000000.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/descript_codec_1_41kbps/libritts_5683_32865_000009_000000.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/encodec_24k_1_5kbps/libritts_5683_32865_000009_000000.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/hifi-codec-2kbps/libritts_5683_32865_000009_000000.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                    </tr>
-                    <tr><!-- extra_num6  -->
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/groundtruth/libritts_5683_32865_000044_000004.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_0_35_kbps/libritts_5683_32865_000044_000004.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_1_43_kbps/libritts_5683_32865_000044_000004.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/descript_codec_1_41kbps/libritts_5683_32865_000044_000004.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/encodec_24k_1_5kbps/libritts_5683_32865_000044_000004.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/hifi-codec-2kbps/libritts_5683_32865_000044_000004.wav"
-                          autoplay />Your browser does not support the audio element.
-                      </audio></td>
-                  </tr>
-                  <tr><!-- extra_num7  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/libritts_5683_32879_000026_000000.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/libritts_5683_32879_000026_000000.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/libritts_5683_32879_000026_000000.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/descript_codec_1_41kbps/libritts_5683_32879_000026_000000.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/encodec_24k_1_5kbps/libritts_5683_32879_000026_000000.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/hifi-codec-2kbps/libritts_5683_32879_000026_000000.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <br></br>
-            <h3>Music (MUSDB) </h3>
-            <!-- <p><b>
-                <font color="061E61">Short Samples:</font>
-              </b></p> -->
-            <div class = "table-container">
-            <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-              <thead>
                 <tr>
-                  <th scope="col" width="265px">
-                    <font color="061E61">Ground-Truth</font>
-                  </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_0.35k</font>
-                  </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">SemanticCodec_1.43k</font>
-                  </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">DescriptCodec_1.41k</font>
-                  </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">EnCodec_1.5k</font>
-                  </th>
-                  <th scope="col" width="265px">
-                    <font color="061E61">HifiCodec_2k</font>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>  <!-- ori_num1  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/musdb_127bass.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/musdb_127bass.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/musdb_127bass.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/descript_codec_1_41kbps/musdb_127bass.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/encodec_24k_1_5kbps/musdb_127bass.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/hifi-codec-2kbps/musdb_127bass.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr>  <!-- ori_num2  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/musdb_145vocals.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/musdb_145vocals.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/musdb_145vocals.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/descript_codec_1_41kbps/musdb_145vocals.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/encodec_24k_1_5kbps/musdb_145vocals.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/hifi-codec-2kbps/musdb_145vocals.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                <tr> <!-- ori_num3  -->
+                  <td>1</td>
                   <td><audio controls="controls">
-                    <source
-                      src="audio/groundtruth/musdb_149other.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
+                          <source src="audio/groundtruth/audioset_YzdRlVEP4DJo.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
                   <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_0_35_kbps/musdb_149other.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
+                          <source src="audio/encodec_24k_3kbps/audioset_YzdRlVEP4DJo.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
                   <td><audio controls="controls">
-                    <source
-                      src="audio/semanticodec_1_43_kbps/musdb_149other.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
+                          <source src="audio/hifi-codec-2kbps/audioset_YzdRlVEP4DJo.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
                   <td><audio controls="controls">
-                    <source
-                      src="audio/descript_codec_1_41kbps/musdb_149other.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
+                          <source src="audio/encodec_24k_1_5kbps/audioset_YzdRlVEP4DJo.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
                   <td><audio controls="controls">
-                    <source
-                      src="audio/encodec_24k_1_5kbps/musdb_149other.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
+                          <source src="audio/descript_codec_1_41kbps/audioset_YzdRlVEP4DJo.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
                   <td><audio controls="controls">
-                    <source
-                      src="audio/hifi-codec-2kbps/musdb_149other.wav"
-                      autoplay />Your browser does not support the audio element.
-                  </audio></td>
+                          <source src="audio/semanticodec_1_43_kbps/audioset_YzdRlVEP4DJo.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/audioset_YzdRlVEP4DJo.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/audioset_YzdRlVEP4DJo.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/audioset_YzdRlVEP4DJo.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/audioset_YzdRlVEP4DJo.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
               </tr>
-              </tbody>
-            </table>
-            <div id="accordion">
-              <div class="card">
-                <div class="card-header" id="headingOne">
-                  <h5 class="mb-0">
-                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
-                      &#x1F449; Click to fold/unfold more examples.
-                    </button>
-                  </h5>
-                </div>
-            
-                <div id="collapseThree" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-                  <div class="card-body">
-                    <table class="table" align="center" style="table-layout: fixed;word-break:break-word">
-                      <thead>
-                        <tr>
-                          <th scope="col" width="265px">
-                            <font color="061E61">Ground-Truth</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_0.35k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">SemanticCodec_1.43k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">DescriptCodec_1.41k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">EnCodec_1.5k</font>
-                          </th>
-                          <th scope="col" width="265px">
-                            <font color="061E61">HifiCodec_2k</font>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr><!-- extra_num1  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/musdb_159vocals.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/musdb_159vocals.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/musdb_159vocals.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/descript_codec_1_41kbps/musdb_159vocals.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/encodec_24k_1_5kbps/musdb_159vocals.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/hifi-codec-2kbps/musdb_159vocals.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num2  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/musdb_161drums.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/musdb_161drums.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/musdb_161drums.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/descript_codec_1_41kbps/musdb_161drums.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/encodec_24k_1_5kbps/musdb_161drums.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/hifi-codec-2kbps/musdb_161drums.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num3  -->
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/groundtruth/musdb_166mixture.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_0_35_kbps/musdb_166mixture.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/semanticodec_1_43_kbps/musdb_166mixture.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/descript_codec_1_41kbps/musdb_166mixture.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/encodec_24k_1_5kbps/musdb_166mixture.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                            <td><audio controls="controls">
-                              <source
-                                src="audio/hifi-codec-2kbps/musdb_166mixture.wav"
-                                autoplay />Your browser does not support the audio element.
-                            </audio></td>
-                        </tr>
-                        <tr><!-- extra_num4  -->
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/groundtruth/musdb_177other.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_0_35_kbps/musdb_177other.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/semanticodec_1_43_kbps/musdb_177other.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/descript_codec_1_41kbps/musdb_177other.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/encodec_24k_1_5kbps/musdb_177other.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                          <td><audio controls="controls">
-                            <source
-                              src="audio/hifi-codec-2kbps/musdb_177other.wav"
-                              autoplay />Your browser does not support the audio element.
-                          </audio></td>
-                      </tr>
-                      <tr><!-- extra_num5  -->
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/groundtruth/musdb_178other.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_0_35_kbps/musdb_178other.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/semanticodec_1_43_kbps/musdb_178other.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/descript_codec_1_41kbps/musdb_178other.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/encodec_24k_1_5kbps/musdb_178other.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                        <td><audio controls="controls">
-                          <source
-                            src="audio/hifi-codec-2kbps/musdb_178other.wav"
-                            autoplay />Your browser does not support the audio element.
-                        </audio></td>
-                    </tr>
-                    <tr><!-- extra_num6  -->
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/groundtruth/musdb_182mixture.wav"
-                          autoplay />Your browser does not support the audio element.
+              <tr>
+                  <td>2</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/musdb_159vocals.wav" autoplay />Your browser does not support the audio
+                          element.
                       </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_0_35_kbps/musdb_182mixture.wav"
-                          autoplay />Your browser does not support the audio element.
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/musdb_159vocals.wav" autoplay />Your browser does not support the audio
+                          element.
                       </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/semanticodec_1_43_kbps/musdb_182mixture.wav"
-                          autoplay />Your browser does not support the audio element.
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/musdb_159vocals.wav" autoplay />Your browser does not support the audio
+                          element.
                       </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/descript_codec_1_41kbps/musdb_182mixture.wav"
-                          autoplay />Your browser does not support the audio element.
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/musdb_159vocals.wav" autoplay />Your browser does not support the
+                          audio element.
                       </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/encodec_24k_1_5kbps/musdb_182mixture.wav"
-                          autoplay />Your browser does not support the audio element.
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/musdb_159vocals.wav" autoplay />Your browser does not support the
+                          audio element.
                       </audio></td>
-                      <td><audio controls="controls">
-                        <source
-                          src="audio/hifi-codec-2kbps/musdb_182mixture.wav"
-                          autoplay />Your browser does not support the audio element.
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/musdb_159vocals.wav" autoplay />Your browser does not support the
+                          audio element.
                       </audio></td>
-                  </tr>
-                  <tr><!-- extra_num7  -->
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/groundtruth/musdb_193drums.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_0_35_kbps/musdb_193drums.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/semanticodec_1_43_kbps/musdb_193drums.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/descript_codec_1_41kbps/musdb_193drums.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/encodec_24k_1_5kbps/musdb_193drums.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                    <td><audio controls="controls">
-                      <source
-                        src="audio/hifi-codec-2kbps/musdb_193drums.wav"
-                        autoplay />Your browser does not support the audio element.
-                    </audio></td>
-                </tr>
-                      </tbody>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/musdb_159vocals.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/musdb_159vocals.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/musdb_159vocals.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/musdb_159vocals.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>3</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/audioset_Yycs92N_rph8.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/audioset_Yycs92N_rph8.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/audioset_Yycs92N_rph8.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/audioset_Yycs92N_rph8.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/audioset_Yycs92N_rph8.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/audioset_Yycs92N_rph8.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/audioset_Yycs92N_rph8.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/audioset_Yycs92N_rph8.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/audioset_Yycs92N_rph8.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/audioset_Yycs92N_rph8.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>4</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/musdb_194mixture.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/musdb_194mixture.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/musdb_194mixture.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/musdb_194mixture.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/musdb_194mixture.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/musdb_194mixture.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/musdb_194mixture.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/musdb_194mixture.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/musdb_194mixture.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/musdb_194mixture.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>5</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/audioset_YzhrRL8yzTEs.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/audioset_YzhrRL8yzTEs.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/audioset_YzhrRL8yzTEs.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/audioset_YzhrRL8yzTEs.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/audioset_YzhrRL8yzTEs.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/audioset_YzhrRL8yzTEs.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/audioset_YzhrRL8yzTEs.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/audioset_YzhrRL8yzTEs.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/audioset_YzhrRL8yzTEs.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/audioset_YzhrRL8yzTEs.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>6</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/musdb_247other.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/musdb_247other.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/musdb_247other.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/musdb_247other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/musdb_247other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/musdb_247other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/musdb_247other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/musdb_247other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/musdb_247other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/musdb_247other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>7</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/audioset_YZJU9afqgUV0.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/audioset_YZJU9afqgUV0.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/audioset_YZJU9afqgUV0.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/audioset_YZJU9afqgUV0.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/audioset_YZJU9afqgUV0.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/audioset_YZJU9afqgUV0.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/audioset_YZJU9afqgUV0.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/audioset_YZJU9afqgUV0.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/audioset_YZJU9afqgUV0.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/audioset_YZJU9afqgUV0.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>8</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/libritts_2300_131720_000041_000001.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/libritts_2300_131720_000041_000001.wav" autoplay />Your browser does
+                          not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/libritts_2300_131720_000041_000001.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/libritts_2300_131720_000041_000001.wav" autoplay />Your browser does
+                          not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/libritts_2300_131720_000041_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/libritts_2300_131720_000041_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/libritts_2300_131720_000041_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/libritts_2300_131720_000041_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/libritts_2300_131720_000041_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/libritts_2300_131720_000041_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>9</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/musdb_91other.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/musdb_91other.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/musdb_91other.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/musdb_91other.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/musdb_91other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/musdb_91other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/musdb_91other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/musdb_91other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/musdb_91other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/musdb_91other.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>10</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/audioset_Yw_z9oSn-eIM.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/audioset_Yw_z9oSn-eIM.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/audioset_Yw_z9oSn-eIM.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/audioset_Yw_z9oSn-eIM.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/audioset_Yw_z9oSn-eIM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/audioset_Yw_z9oSn-eIM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/audioset_Yw_z9oSn-eIM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/audioset_Yw_z9oSn-eIM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/audioset_Yw_z9oSn-eIM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/audioset_Yw_z9oSn-eIM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>11</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/musdb_6vocals.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/musdb_6vocals.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/musdb_6vocals.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/musdb_6vocals.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/musdb_6vocals.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/musdb_6vocals.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/musdb_6vocals.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/musdb_6vocals.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/musdb_6vocals.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/musdb_6vocals.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>12</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/audioset_YyCvrvgukN4U.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/audioset_YyCvrvgukN4U.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/audioset_YyCvrvgukN4U.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/audioset_YyCvrvgukN4U.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/audioset_YyCvrvgukN4U.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/audioset_YyCvrvgukN4U.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/audioset_YyCvrvgukN4U.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/audioset_YyCvrvgukN4U.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/audioset_YyCvrvgukN4U.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/audioset_YyCvrvgukN4U.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>13</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/libritts_121_127105_000044_000001.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/libritts_121_127105_000044_000001.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/libritts_121_127105_000044_000001.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/libritts_121_127105_000044_000001.wav" autoplay />Your browser does
+                          not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/libritts_121_127105_000044_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/libritts_121_127105_000044_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/libritts_121_127105_000044_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/libritts_121_127105_000044_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/libritts_121_127105_000044_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/libritts_121_127105_000044_000001.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>14</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/libritts_7021_85628_000029_000000.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/libritts_7021_85628_000029_000000.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/libritts_7021_85628_000029_000000.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/libritts_7021_85628_000029_000000.wav" autoplay />Your browser does
+                          not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/libritts_7021_85628_000029_000000.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/libritts_7021_85628_000029_000000.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/libritts_7021_85628_000029_000000.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/libritts_7021_85628_000029_000000.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/libritts_7021_85628_000029_000000.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/libritts_7021_85628_000029_000000.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>15</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/audioset_Ywy5edFMFcyM.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/audioset_Ywy5edFMFcyM.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/audioset_Ywy5edFMFcyM.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/audioset_Ywy5edFMFcyM.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/audioset_Ywy5edFMFcyM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/audioset_Ywy5edFMFcyM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/audioset_Ywy5edFMFcyM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/audioset_Ywy5edFMFcyM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/audioset_Ywy5edFMFcyM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/audioset_Ywy5edFMFcyM.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>16</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/musdb_243drums.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/musdb_243drums.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/musdb_243drums.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/musdb_243drums.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/musdb_243drums.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/musdb_243drums.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/musdb_243drums.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/musdb_243drums.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/musdb_243drums.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/musdb_243drums.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>17</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/libritts_1089_134686_000009_000006.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/libritts_1089_134686_000009_000006.wav" autoplay />Your browser does
+                          not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/libritts_1089_134686_000009_000006.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/libritts_1089_134686_000009_000006.wav" autoplay />Your browser does
+                          not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/libritts_1089_134686_000009_000006.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/libritts_1089_134686_000009_000006.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/libritts_1089_134686_000009_000006.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/libritts_1089_134686_000009_000006.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/libritts_1089_134686_000009_000006.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/libritts_1089_134686_000009_000006.wav" autoplay />Your browser
+                          does not support the audio element.
+                      </audio></td>
+              </tr>
+              <tr>
+                  <td>18</td>
+                  <td><audio controls="controls">
+                          <source src="audio/groundtruth/audioset_YYqc71wg948Y.wav" autoplay />Your browser does not support the audio
+                          element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_3kbps/audioset_YYqc71wg948Y.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/hifi-codec-2kbps/audioset_YYqc71wg948Y.wav" autoplay />Your browser does not support the
+                          audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/encodec_24k_1_5kbps/audioset_YYqc71wg948Y.wav" autoplay />Your browser does not support
+                          the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_1_41kbps/audioset_YYqc71wg948Y.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_1_43_kbps/audioset_YYqc71wg948Y.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_71kbps/audioset_YYqc71wg948Y.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_71_kbps/audioset_YYqc71wg948Y.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/descript_codec_0_47kbps/audioset_YYqc71wg948Y.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+                  <td><audio controls="controls">
+                          <source src="audio/semanticodec_0_35_kbps/audioset_YYqc71wg948Y.wav" autoplay />Your browser does not
+                          support the audio element.
+                      </audio></td>
+              </tr>
+                </tbody>
                     </table>
+                    <p>
+                      <font color="061E61">For more audio samples, please refer to the <a href="https://github.com/haoheliu/SemantiCodec">github page repo</a>.
+                      </font>
+                    </p>
+
+                    <h2 id="section_3">
+                      <font color="000093">Long-form Audio Reconstruction</font>
+                      <p>
+                        TODO
+                      </p>
+                    </h2>
+
                   </div>
                 </div>
               </div>
@@ -2271,21 +1273,12 @@
             </table> -->
             <hr>
 
-
-              <h2>Acknowledgement</h2>
-              This research was partly supported by the British Broadcasting Corporation Research and Development~(BBC R&D), 
-              Engineering and Physical Sciences Research Council (EPSRC) Grant EP/T019751/1 ``AI for Sound'', 
-              and a PhD scholarship from the Centre for Vision, Speech and Signal Processing (CVSSP), Faculty of Engineering and Physical Science (FEPS), 
-              University of Surrey. For the purpose of open access, the authors have applied a Creative Commons Attribution (CC BY) license to any Author Accepted Manuscript version arising.
-              <br></br>
-              <hr>
-              Page updated on 30 April 2024  
-              <br></br>
           </section>
         </article>
       </main>
 
     </div>
+
 
     <script>
       (function (i, s, o, g, r, a, m) {
