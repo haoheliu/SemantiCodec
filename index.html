@@ -258,25 +258,20 @@
           </p>
 
           <h2 id="note">
-            <font color="000093">Note</font>
+            <font color="000093">Highlights</font>
           </h2>
           <li>
-            <font color="061E61"> We propose SemantiCodec, which leverages strong generative models and the rich feature
-              learnt by self-supervised model for semantic-driven audio encoding and reconstruction. </font>
+            <font color="061E61"> <b>Ultra-Low bit rate</b> We focus on bitrate between 0.31 kbps and 1.43 kbps, with token rate of 25, 50, or 100 per second. </font>
           </li>
           <li>
-            <font color="061E61">
-              SemantiCodec achieves strong reconstruction performance across general audio types at exceptionally low
-              token rates of $25$, $50$, and $100$ per second, even surpassing counterparts operating at significantly
-              higher token rates.
+            <font color="061E61"> <b>Strong semantic in the audio token</b> Indicated by classification accuracy.
             </font>
           </li>
           <li>
-            <font color="061E61">
-              Evaluation on audio classification benchmarks demonstrates the significantly richer semantic information
-              in the token of SemantiCodec, even with a single layer of vector quantization, indicating strong potential
-              in future audio language modelling with the SemantiCodec. </font>
+            <font color="061E61"> <b>Supporting variable vocabulary sizes</b> One model that supporting four different vocabulary sizes.
+            </font>
           </li>
+
           <!-- <li>
               <font color="061E61"> AudioLDM enables zero-shot text-guided audio style-transfer, inpainting, and
                 super-resolution.</font>
@@ -298,8 +293,33 @@
             </figcaption>
           </figure>
 
-
-
+          <figure>
+            <p align="center"><img src="result.png" width="98%" class="center" /></p>
+            <figcaption>
+              <p style="text-align: justify;">
+                <font color="061E61"><b>Figure 1:</b> Comparison with state-of-the-art neural audio codec
+              </p>
+            </figcaption>
+          </figure>
+          
+          <!-- <h2>Highlights</h2>
+          <li>
+            <font color="061E61"> We propose SemantiCodec, which leverages strong generative models and the rich feature
+              learnt by self-supervised model for semantic-driven audio encoding and reconstruction. </font>
+          </li>
+          <li>
+            <font color="061E61">
+              SemantiCodec achieves strong reconstruction performance across general audio types at exceptionally low
+              token rates of $25$, $50$, and $100$ per second, even surpassing counterparts operating at significantly
+              higher token rates.
+            </font>
+          </li>
+          <li>
+            <font color="061E61">
+              Evaluation on audio classification benchmarks demonstrates the significantly richer semantic information
+              in the token of SemantiCodec, even with a single layer of vector quantization, indicating strong potential
+              in future audio language modelling with the SemantiCodec. </font>
+          </li> -->
 
           <br></br>
           <h2 id="section_3">
@@ -307,7 +327,7 @@
           </h2>
           <p>
             <font color="061E61">✅ We provide the original and the reconstructed audio samples of Encodec (3.0, 1.5
-              kbps), HiFi-Codec (2.0 kbps), Descript codec (1.41, 0.78, 0.47 kbps), and proposed SemantiCodec (1.43,
+              kbps), HiFi-Codec (2.0 kbps), Descript codec (1.41, 0.78, 0.47 kbps, reproduced using open-sourced code), and proposed SemantiCodec (1.43,
               0.71, 0.35 kbps).
             </font>
           </p>
