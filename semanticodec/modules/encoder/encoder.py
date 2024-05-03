@@ -14,13 +14,13 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
         self,
         centroid_npy_path=None,
         feature_dimension=768,
-        codebook_size=2048,
+        codebook_size=8192,
         codebook_dim=None,
         use_cosine_sim=False,
         decay=0.9,
         residual_encoder="lstm",
         lstm_layer = 2,
-        lstm_bidirectional=False,
+        lstm_bidirectional=True,
         commitment_weight=1.0,
         rvq_layers=0,
         use_oracle=False,
@@ -35,17 +35,7 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
         self.device = None
         self.pos_embed = PositionalEncoding(seq_length=512, embedding_dim=192)
 
-        if centroid_npy_path is None:
-            # raise ValueError("centroid_npy_path is required")
-            if self.downsampling_rate == 1:
-                centroid_npy_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/pretrained/codebook_idx/combine_512_audioset_dominate/codebook_16384_0.npy"
-            elif self.downsampling_rate == 2:
-                centroid_npy_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/pretrained/codebook_idx/combine_256_audioset_dominate/codebook_16384_0.npy"
-            elif self.downsampling_rate == 4:
-                centroid_npy_path = "/mnt/bn/lqhaoheliu/project/SemantiCodec/pretrained/codebook_idx/combine_128_audioset_dominate/codebook_16384_0.npy"
-            else:
-                raise ValueError("Invalid downsampling rate %s" % self.downsampling_rate)
-        
+        assert centroid_npy_path is not None, "centroid_npy_path is required"
         self.centroid_npy = torch.from_numpy(np.load(centroid_npy_path))
 
         self.centroid_npy.requires_grad = False
@@ -101,6 +91,14 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
         self.indices_statistic_count = 0
         self.indices_statistic = {}
         self.eval()
+
+    def mark_out_padding(self, feature, padding_cutoff_index):
+        feature_temporal_dim = feature.shape[-2]
+        for i, index in enumerate(padding_cutoff_index):
+            feature_cutoff_index = math.ceil(feature_temporal_dim * index)
+            feature[i, int(feature_cutoff_index):] *= 0.0
+            feature[i, int(feature_cutoff_index):] -= 1.0
+        return feature
 
     # Required
     def get_unconditional_condition(self, batchsize):
@@ -277,7 +275,7 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
 
         if remaining_batch.size(-2) > 0:
             # Pad to window length
-            remaining_batch = F.pad(remaining_batch, (0, 0, 0, window_length - remaining_batch.size(-2), 0, 0))
+            # remaining_batch = F.pad(remaining_batch, (0, 0, 0, window_length - remaining_batch.size(-2), 0, 0))
             token_window_list.append(remaining_batch)
         return token_window_list
         
@@ -314,6 +312,36 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
 
         batch = batch.unsqueeze(1)
 
+        padding_cutoff_index = []
+        temporal_dim = batch.shape[-2]
+        for i in range(batch.shape[0]):
+            active_index = torch.std(batch[i,0], dim=-1)<=1e-7 # F F T T F F T T T T T
+            # If there are empty segment in the audio or there are padding in the audio
+            try:
+                if active_index.any():
+                    # Convert boolean tensor to integer tensor where False becomes 0
+                    int_tensor = active_index == False
+                    # Find indices where the tensor is False
+                    false_indices = torch.nonzero(int_tensor, as_tuple=False).squeeze()
+                    # Get the last index of False
+                    # last_false_index = false_indices[-1].item() if false_indices.numel() > 0 else -1
+                    if false_indices.numel() > 0:
+                        last_false_index = false_indices[-1].item()
+                    else:
+                        last_false_index = -1
+                    column_max = last_false_index + 1
+                # If there are no any empty segment in the audio
+                else:
+                    column_max = temporal_dim
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                print(false_indices)
+                print(false_indices.numel())
+                column_max = 0
+
+            padding_cutoff_index.append(column_max/temporal_dim)
+
         with torch.no_grad():
             # [bs, 513, 768]
             representation = self.audiomae(
@@ -344,6 +372,8 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
             representation_quant_stack_unquant = torch.cat(
                 [representation, representation_quant], dim=-1
             )
+            
+            representation_quant_stack_unquant = self.mark_out_padding(representation_quant_stack_unquant, padding_cutoff_index)
 
             # Use the encoder to extract extra information for conditioning
             if self.residual_encoder == "transformer":
@@ -379,6 +409,8 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
 
             representation_quant = torch.cat([representation], dim=-1)
 
+        representation_quant = self.mark_out_padding(representation_quant, padding_cutoff_index)
+
         if self.use_positional_embedding:
             pe = self.pos_embed(representation_quant).to(representation_quant.device)
             representation_quant = torch.cat(
@@ -399,7 +431,6 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
     def token_to_quantized_feature(self, tokens):
         semantic_tokens, acoustic_tokens = tokens[...,0], tokens[...,1]
         semantic_feature = self.unquant(semantic_tokens)
-        print(semantic_feature.shape)
         token_num, feature_dim = semantic_feature.shape[-2], semantic_feature.shape[-1]
         acoustic_feature = self.quantizer.get_output_from_indices(acoustic_tokens).reshape(1, token_num, feature_dim)
         return torch.cat(
@@ -412,57 +443,3 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
             "tokens": tokens
         }
 
-
-if __name__ == "__main__":
-    def extract_state_dict(checkpoint_path):
-        state_dict = torch.load(checkpoint_path)["state_dict"]
-        new_state_dict = {}
-        for key in state_dict.keys():
-            if "cond_stage_models.0" in key:
-                if "pos_embed.pe" in key:
-                    continue
-                new_key_name = key.replace("cond_stage_models.0.","")
-                new_state_dict[new_key_name] = state_dict[key]
-        return new_state_dict
-    
-    # The 1.45 kbps checkpoint
-    checkpoint_path = "pretrained/semanticcodec_512.ckpt"
-    audiomaequant = AudioMAEConditionQuantResEncoder(feature_dimension=768, codebook_size=8192, use_positional_embedding=True, lstm_layer=4, lstm_bidirectional=True).cuda()
-    state_dict = extract_state_dict(checkpoint_path)
-    audiomaequant.load_state_dict(state_dict)
-    waveform, sr = torchaudio.load("/mnt/bn/lqhaoheliu/project/SemantiCodec/output_512/audioset_Y_oeM7Osk7DI.wav")
-    mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
-    assert mel.shape == (1, 1024, 128)
-    output = audiomaequant(mel.cuda())
-    assert output["audiomae_feature_after_quant"].shape == (1, 512, 768), output["audiomae_feature_after_quant"].shape # the first VQ layer feature
-    output = output["crossattn_audiomae_pooled"][0] # Use this feature for HEAR evaluation
-    assert output.shape == (1, 512, 1728) == output.shape
-
-    # The 0.71 kbps checkpoint
-    checkpoint_path = "pretrained/semanticcodec_256.ckpt"
-    audiomaequant = AudioMAEConditionQuantResEncoder(feature_dimension=768*2, codebook_size=8192, use_positional_embedding=False, lstm_layer=3, lstm_bidirectional=True).cuda()
-    state_dict = extract_state_dict(checkpoint_path)
-    audiomaequant.load_state_dict(state_dict)
-    waveform, sr = torchaudio.load("KzvdKLdBw3s.wav")
-    mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
-    assert mel.shape == (1, 1024, 128)
-    output = audiomaequant(mel.cuda())
-    assert output["audiomae_feature_after_quant"].shape == (1, 256, 768*2)
-    output = output["crossattn_audiomae_pooled"][0] # Use this feature for HEAR evaluation
-    assert output.shape == (1, 256, 1536*2), output.shape
-    
-
-    # The 0.35 kbps checkpoint
-    checkpoint_path = "pretrained/semanticcodec_128.ckpt"
-    audiomaequant = AudioMAEConditionQuantResEncoder(feature_dimension=768*4, codebook_size=8192, use_positional_embedding=False, lstm_layer=2, lstm_bidirectional=True).cuda()
-    state_dict = extract_state_dict(checkpoint_path)
-    audiomaequant.load_state_dict(state_dict)
-    waveform, sr = torchaudio.load("KzvdKLdBw3s.wav")
-    mel = extract_kaldi_fbank_feature(waveform, sr)["ta_kaldi_fbank"].unsqueeze(0)
-    assert mel.shape == (1, 1024, 128)
-    output = audiomaequant(mel.cuda())
-    assert output["audiomae_feature_after_quant"].shape == (1, 128, 768*4)
-    output = output["crossattn_audiomae_pooled"][0] # Use this feature for HEAR evaluation
-    assert output.shape == (1, 128, 1536*4), output.shape
-    
-    
