@@ -65,10 +65,6 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
             bias=False,
         )
 
-        print(
-            "Vector Quantization with %s. Commit loss weight %s. Decay %s"
-            % (codebook_size, commitment_weight, decay)
-        )
         self.rvq_layers = rvq_layers
         self.codebook_size = codebook_size
         if rvq_layers <= 0:
@@ -81,7 +77,6 @@ class AudioMAEConditionQuantResEncoder(nn.Module):
                 use_cosine_sim = use_cosine_sim
             )
         else:
-            print("Use Residual Vector Quantization")
             self.quantizer = ResidualVQ(
                 dim=feature_dimension,
                 num_quantizers=rvq_layers,  # specify number of quantizers

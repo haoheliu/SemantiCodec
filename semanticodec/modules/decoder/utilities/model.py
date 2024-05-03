@@ -56,68 +56,16 @@ def get_vocoder(config, device, mel_bins):
         vocoder.mel2wav.eval()
         vocoder.mel2wav.to(device)
     elif name == "HiFi-GAN":
-        if mel_bins == 64:
-            with open(os.path.join(ROOT, "hifigan/config_16k_64.json"), "r") as f:
-                config = json.load(f)
-            config = hifigan.AttrDict(config)
-            vocoder = hifigan.Generator_old(config)
-            # print("Load hifigan/g_01080000")
-            # ckpt = torch.load(os.path.join(ROOT, "hifigan/g_01080000"))
-            print("Load hifigan/g_00660000")
-            ckpt = torch.load(os.path.join(ROOT, "hifigan/g_00660000"))
-            ckpt = torch_version_orig_mod_remove(ckpt)
-            vocoder.load_state_dict(ckpt["generator"])
-            vocoder.eval()
-            vocoder.remove_weight_norm()
-            vocoder.to(device)
-        elif mel_bins == 128:
-            with open("hifigan/config_16k_128.json", "r") as f:
-                config = json.load(f)
-            config = hifigan.AttrDict(config)
-            vocoder = hifigan.Generator_old(config)
-            print("Load hifigan/g_01440000")
-            ckpt = torch.load(os.path.join(ROOT, "hifigan/g_01440000"))
-            ckpt = torch_version_orig_mod_remove(ckpt)
-            vocoder.load_state_dict(ckpt["generator"])
-            vocoder.eval()
-            vocoder.remove_weight_norm()
-            vocoder.to(device)
-        # elif mel_bins == 256:
-        #     with open(os.path.join(ROOT, "hifigan/config_hifigan_32k_256.json"), "r") as f:
-        #         config = json.load(f)
-        #     config = hifigan.AttrDict(config)
-        #     vocoder = hifigan.Generator(config)
-        #     print("Load hifigan/g_01910000")
-        #     ckpt = torch.load(os.path.join(ROOT, "hifigan/g_01910000"))
-        #     ckpt = torch_version_orig_mod_remove(ckpt)
-        #     vocoder.load_state_dict(ckpt["generator"])
-        #     vocoder.eval()
-        #     vocoder.remove_weight_norm()
-        #     vocoder.to(device)
-        # elif mel_bins == 256:
-        #     with open(os.path.join(ROOT, "hifigan/config_48k_1024.json"), "r") as f:
-        #         config = json.load(f)
-        #     config = hifigan.AttrDict(config)
-        #     vocoder = hifigan.Generator(config)
-        #     print("Load hifigan/g_00650000")
-        #     ckpt = torch.load(os.path.join(ROOT, "hifigan/g_00650000"))
-        #     ckpt = torch_version_orig_mod_remove(ckpt)
-        #     vocoder.load_state_dict(ckpt["generator"])
-        #     vocoder.eval()
-        #     vocoder.remove_weight_norm()
-        #     vocoder.to(device)
-        elif mel_bins == 256:
-            with open(os.path.join(ROOT, "hifigan/config_48k_1536.json"), "r") as f:
-                config = json.load(f)
-            config = hifigan.AttrDict(config)
-            vocoder = hifigan.Generator(config)
-            print("Load hifigan/g_00280000")
-            ckpt = torch.load(os.path.join(ROOT, "hifigan/g_00280000"))
-            ckpt = torch_version_orig_mod_remove(ckpt)
-            vocoder.load_state_dict(ckpt["generator"])
-            vocoder.eval()
-            vocoder.remove_weight_norm()
-            vocoder.to(device)
+        with open(os.path.join(ROOT, "hifigan/config_16k_64.json"), "r") as f:
+            config = json.load(f)
+        config = hifigan.AttrDict(config)
+        vocoder = hifigan.Generator_old(config)
+        ckpt = torch.load(os.path.join(ROOT, "hifigan/g_00660000"))
+        ckpt = torch_version_orig_mod_remove(ckpt)
+        vocoder.load_state_dict(ckpt["generator"])
+        vocoder.eval()
+        vocoder.remove_weight_norm()
+        vocoder.to(device)
     return vocoder
 
 
@@ -129,11 +77,5 @@ def vocoder_infer(mels, vocoder, lengths=None):
 
     if lengths is not None:
         wavs = wavs[:, :lengths]
-
-    # wavs = [wav for wav in wavs]
-
-    # for i in range(len(mels)):
-    #     if lengths is not None:
-    #         wavs[i] = wavs[i][: lengths[i]]
 
     return wavs

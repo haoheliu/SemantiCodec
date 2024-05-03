@@ -845,7 +845,6 @@ class UNetModel(nn.Module):
         :return: an [N x C x ...] Tensor of outputs.
         """
         if not self.shape_reported:
-            print("The shape of UNet input is", x.size())
             self.shape_reported = True
 
         assert (y is not None) == (

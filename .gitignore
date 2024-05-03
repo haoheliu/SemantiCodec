@@ -5,3 +5,10 @@ g_*
 *.pyc
 *.pkl
 *.json
+codebook_idx
+long_audio*
+output*
+sample*
+*.json
+*.egg-info
+.ipynb*

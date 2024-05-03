@@ -69,7 +69,7 @@ def get_config(token_rate=100, vocab_size=None, checkpoint_path=None):
                 "target": "semanticodec.modules.decoder.latent_diffusion.modules.losses.LPIPSWithDiscriminator"
             }
             }, 
-            "target": "latent_encoder.autoencoder.AutoencoderKL", 
+            "target": "semanticodec.modules.decoder.latent_encoder.autoencoder.AutoencoderKL", 
             "base_learning_rate": 8e-06
         }, 
         "unet_config": {

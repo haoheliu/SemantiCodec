@@ -4,23 +4,19 @@ import os
 
 import pytorch_lightning as pl
 import torch.nn.functional as F
-from contextlib import contextmanager
 import numpy as np
 from semanticodec.modules.decoder.latent_diffusion.modules.ema import *
 
-from taming.modules.vqvae.quantize import VectorQuantizer2 as VectorQuantizer
-from torch.optim.lr_scheduler import LambdaLR
 from semanticodec.modules.decoder.latent_diffusion.modules.diffusionmodules.model import Encoder, Decoder
 from semanticodec.modules.decoder.latent_diffusion.modules.distributions.distributions import (
     DiagonalGaussianDistribution,
 )
 
 import wandb
-from semanticodec.modules.decoder.latent_diffusion.util import instantiate_from_config
 import soundfile as sf
 
-from utilities.model import get_vocoder
-from utilities.tools import synth_one_sample
+from semanticodec.modules.decoder.utilities.model import get_vocoder
+from semanticodec.modules.decoder.utilities.tools import synth_one_sample
 
 class AutoencoderKL(pl.LightningModule):
     def __init__(
@@ -83,24 +79,6 @@ class AutoencoderKL(pl.LightningModule):
         self.logger_exp_name = None
         self.logger_exp_group_name = None
 
-        if not self.reloaded and self.reload_from_ckpt is not None:
-            print("--> Reload weight of autoencoder from %s" % self.reload_from_ckpt)
-            checkpoint = torch.load(self.reload_from_ckpt)
-            
-            load_todo_keys = {}
-            pretrained_state_dict = checkpoint["state_dict"]
-            current_state_dict = self.state_dict()
-            for key in current_state_dict:
-                if(key in pretrained_state_dict.keys() and pretrained_state_dict[key].size() == current_state_dict[key].size()):
-                    load_todo_keys[key] = pretrained_state_dict[key]
-                else:
-                    print("Key %s mismatch during loading, seems fine" % key)
-
-            self.load_state_dict(load_todo_keys, strict=False)
-            self.reloaded = True
-        else:
-            print("Train from scratch")
-
     def get_log_dir(self):
         return os.path.join(self.logger_save_dir, self.logger_exp_group_name, self.logger_exp_name)
 
@@ -147,52 +125,6 @@ class AutoencoderKL(pl.LightningModule):
             wav_reconstruction = self.wave_decoder(dec)
         return wav_reconstruction
 
-    def visualize_latent(self, input):
-        import matplotlib.pyplot as plt
-
-        # for i in range(10):
-        #     zero_input = torch.zeros_like(input) - 11.59
-        #     zero_input[:,:,i * 16: i * 16 + 16,:16] += 13.59
-
-        #     posterior = self.encode(zero_input)
-        #     latent = posterior.sample()
-        #     avg_latent = torch.mean(latent, dim=1)[0]
-        #     plt.imshow(avg_latent.cpu().detach().numpy().T)
-        #     plt.savefig("%s.png" % i)
-        #     plt.close()
-
-        np.save("input.npy", input.cpu().detach().numpy())
-        # zero_input = torch.zeros_like(input) - 11.59
-        time_input = input.clone()
-        time_input[:, :, :, :32] *= 0
-        time_input[:, :, :, :32] -= 11.59
-
-        np.save("time_input.npy", time_input.cpu().detach().numpy())
-
-        posterior = self.encode(time_input)
-        latent = posterior.sample()
-        np.save("time_latent.npy", latent.cpu().detach().numpy())
-        avg_latent = torch.mean(latent, dim=1)
-        for i in range(avg_latent.size(0)):
-            plt.imshow(avg_latent[i].cpu().detach().numpy().T)
-            plt.savefig("freq_%s.png" % i)
-            plt.close()
-
-        freq_input = input.clone()
-        freq_input[:, :, :512, :] *= 0
-        freq_input[:, :, :512, :] -= 11.59
-
-        np.save("freq_input.npy", freq_input.cpu().detach().numpy())
-
-        posterior = self.encode(freq_input)
-        latent = posterior.sample()
-        np.save("freq_latent.npy", latent.cpu().detach().numpy())
-        avg_latent = torch.mean(latent, dim=1)
-        for i in range(avg_latent.size(0)):
-            plt.imshow(avg_latent[i].cpu().detach().numpy().T)
-            plt.savefig("time_%s.png" % i)
-            plt.close()
-
     def forward(self, input, sample_posterior=True):
         posterior = self.encode(input)
         if sample_posterior:
@@ -207,49 +139,6 @@ class AutoencoderKL(pl.LightningModule):
         dec = self.decode(z)
 
         return dec, posterior
-
-    def get_input(self, batch):
-        fname, text, label_indices, waveform, stft, fbank = (
-            batch["fname"],
-            batch["text"],
-            batch["label_vector"],
-            batch["waveform"],
-            batch["stft"],
-            batch["log_mel_spec"],
-        )
-        # if(self.time_shuffle != 1):
-        #     if(fbank.size(1) % self.time_shuffle != 0):
-        #         pad_len = self.time_shuffle - (fbank.size(1) % self.time_shuffle)
-        #         fbank = torch.nn.functional.pad(fbank, (0,0,0,pad_len))
-
-        ret = {}
-
-        ret["fbank"], ret["stft"], ret["fname"], ret["waveform"] = (
-            fbank.unsqueeze(1),
-            stft.unsqueeze(1),
-            fname,
-            waveform.unsqueeze(1),
-        )
-
-        return ret
-
-    # def time_shuffle_operation(self, fbank):
-    #     if(self.time_shuffle == 1):
-    #         return fbank
-
-    #     shuffled_fbank = []
-    #     for i in range(self.time_shuffle):
-    #         shuffled_fbank.append(fbank[:,:, i::self.time_shuffle,:])
-    #     return torch.cat(shuffled_fbank, dim=1)
-
-    # def time_unshuffle_operation(self, shuffled_fbank, bs, timesteps, fbins):
-    #     if(self.time_shuffle == 1):
-    #         return shuffled_fbank
-
-    #     buffer = torch.zeros((bs, 1, timesteps, fbins)).to(shuffled_fbank.device)
-    #     for i in range(self.time_shuffle):
-    #         buffer[:,0,i::self.time_shuffle,:] = shuffled_fbank[:,i,:,:]
-    #     return buffer
 
     def freq_split_subband(self, fbank):
         if self.subband == 1 or self.image_key != "stft":

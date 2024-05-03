@@ -19,7 +19,7 @@ AUDIOMAE_PATCH_DURATION = 0.16
 SEGMENT_OVERLAP_RATIO = 0.0625
 
 class SemantiCodec(nn.Module):
-    def __init__(self, token_rate, vocab_size, ddim_sample_step=50, cfg_scale=2.0, checkpoint_path=None):
+    def __init__(self, token_rate, semantic_vocab_size, ddim_sample_step=50, cfg_scale=2.0, checkpoint_path=None):
         super().__init__()
         self.token_rate = token_rate
         self.stack_factor_K = 100 / self.token_rate
@@ -32,20 +32,22 @@ class SemantiCodec(nn.Module):
             self.device = torch.device("cpu")
         
         # Initialize encoder and decoder
-        config, checkpoint_path, feature_dim, lstm_layers, semanticodebook = get_config(token_rate, vocab_size, checkpoint_path)
+        config, checkpoint_path, feature_dim, lstm_layers, semanticodebook = get_config(token_rate, semantic_vocab_size, checkpoint_path)
         
         # Initialize encoder
-        print("Loading SemantiCodec encoder")
+        print("🚀 Loading SemantiCodec encoder")
         self.encoder = AudioMAEConditionQuantResEncoder(feature_dimension=feature_dim, lstm_layer=lstm_layers, centroid_npy_path=semanticodebook).to(self.device)
         state_dict = extract_encoder_state_dict(checkpoint_path)
         self.encoder.load_state_dict(state_dict)
+        print("✅ Encoder loaded")
 
         # Initialize decoder
-        print("Loading SemantiCodec decoder")
-        semanticodec_decoder = instantiate_from_config(config["model"]).to(self.device)
+        print("🚀 Loading SemantiCodec decoder")
+        self.decoder = instantiate_from_config(config["model"]).to(self.device)
         checkpoint = torch.load(checkpoint_path)["state_dict"]
         checkpoint = {k:v for k,v in checkpoint.items() if "clap" not in k and "loss" not in k and "cond_stage" not in k}
-        semanticodec_decoder.load_state_dict(checkpoint)
+        self.decoder.load_state_dict(checkpoint)
+        print("✅ Decoder loaded")
 
     def load_audio(self, filepath):
         if not os.path.exists(filepath):
@@ -85,13 +87,13 @@ class SemantiCodec(nn.Module):
         windowed_waveform = []
         for _, windowed_token in enumerate(windowed_token_list):
             latent = self.encoder.token_to_quantized_feature(windowed_token)
-            latent = torch.cat([latent, torch.ones(latent.shape[0], 512 / self.stack_factor_K - latent.shape[1], latent.shape[2]).to(latent.device) * -1], dim=1)
-            waveform = self.encoder.generate_sample(latent, ddim_steps=self.ddim_sample_step, unconditional_guidance_scale=self.cfg_scale)
+            latent = torch.cat([latent, torch.ones(latent.shape[0], int(512 / self.stack_factor_K) - latent.shape[1], latent.shape[2]).to(latent.device) * -1], dim=1)
+            waveform = self.decoder.generate_sample(latent, ddim_steps=self.ddim_sample_step, unconditional_guidance_scale=self.cfg_scale)
             windowed_waveform.append(waveform)
         output = overlap_add_waveform(windowed_waveform, overlap_duration=SEGMENT_DURATION * SEGMENT_OVERLAP_RATIO)
         # Each patch step equal 16 mel time frames, which have 0.01 second
-        trim_duration = (tokens.shape[1] / 8 / self.stack_factor_K) * 16 * 0.01
-        output = output[...,:int(trim_duration * SAMPLE_RATE)]
+        trim_duration = (tokens.shape[1] / 8) * 16 * 0.01 * self.stack_factor_K
+        return output[...,:int(trim_duration * SAMPLE_RATE)]
 
     def forward(self, filepath):
         tokens = self.encode(filepath)
