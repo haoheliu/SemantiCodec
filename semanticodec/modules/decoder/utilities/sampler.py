@@ -1,6 +1,5 @@
 from typing import Iterator, List, Optional, Union
 from collections import Counter
-import logging
 from operator import itemgetter
 import random
 
@@ -8,8 +7,6 @@ import numpy as np
 
 from torch.utils.data import DistributedSampler
 from torch.utils.data.sampler import Sampler
-
-LOGGER = logging.getLogger(__name__)
 
 from torch.utils.data import Dataset, Sampler
 

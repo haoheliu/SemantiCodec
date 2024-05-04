@@ -1,27 +1,26 @@
-from tabnanny import check
-
 
 def get_config(token_rate=100, vocab_size=None, checkpoint_path=None):
     assert vocab_size in [4096, 8192, 16384, 32768], "vocab_size must be 4096, 8192, 16384 or 32768"
+    assert token_rate in [25, 50, 100], "token_rate must be 25, 50 or 100"
 
     semantic_codebook = {
         25: {
-            4096: "codebook_idx/combine_128_audioset_dominate/codebook_2048_0.npy",
-            8192: "codebook_idx/combine_128_audioset_dominate/codebook_4096_0.npy",
-            16384: "codebook_idx/combine_128_audioset_dominate/codebook_8192_0.npy",
-            32768: "codebook_idx/combine_128_audioset_dominate/codebook_16384_0.npy",
+            4096: "pretrained/codebook_idx/combine_128_audioset_dominate/codebook_2048_0.npy",
+            8192: "pretrained/codebook_idx/combine_128_audioset_dominate/codebook_4096_0.npy",
+            16384: "pretrained/codebook_idx/combine_128_audioset_dominate/codebook_8192_0.npy",
+            32768: "pretrained/codebook_idx/combine_128_audioset_dominate/codebook_16384_0.npy",
         },
         50: {
-            4096: "codebook_idx/combine_256_audioset_dominate/codebook_2048_0.npy",
-            8192: "codebook_idx/combine_256_audioset_dominate/codebook_4096_0.npy",
-            16384: "codebook_idx/combine_256_audioset_dominate/codebook_8192_0.npy",
-            32768: "codebook_idx/combine_256_audioset_dominate/codebook_16384_0.npy",
+            4096: "pretrained/codebook_idx/combine_256_audioset_dominate/codebook_2048_0.npy",
+            8192: "pretrained/codebook_idx/combine_256_audioset_dominate/codebook_4096_0.npy",
+            16384: "pretrained/codebook_idx/combine_256_audioset_dominate/codebook_8192_0.npy",
+            32768: "pretrained/codebook_idx/combine_256_audioset_dominate/codebook_16384_0.npy",
         },
         100: {
-            4096: "codebook_idx/combine_512_audioset_dominate/codebook_2048_0.npy",
-            8192: "codebook_idx/combine_512_audioset_dominate/codebook_4096_0.npy",
-            16384: "codebook_idx/combine_512_audioset_dominate/codebook_8192_0.npy",
-            32768: "codebook_idx/combine_512_audioset_dominate/codebook_16384_0.npy",
+            4096: "pretrained/codebook_idx/combine_512_audioset_dominate/codebook_2048_0.npy",
+            8192: "pretrained/codebook_idx/combine_512_audioset_dominate/codebook_4096_0.npy",
+            16384: "pretrained/codebook_idx/combine_512_audioset_dominate/codebook_8192_0.npy",
+            32768: "pretrained/codebook_idx/combine_512_audioset_dominate/codebook_16384_0.npy",
         },
     }
 
@@ -147,14 +146,9 @@ def get_config(token_rate=100, vocab_size=None, checkpoint_path=None):
         raise ValueError("token_rate must be 50, 25 or 100")
 
     if checkpoint_path is None:
-        if token_rate == 100:
-            checkpoint_path = "/mnt/bn/hlhaoheliu2/semanticodec_log/43_search_best/2024_04_11_lstm_bidirectional_512_rand_centroid/checkpoints/checkpoint-fad-133.00-global_step=969999.ckpt"
-        elif token_rate == 50:
-            checkpoint_path = "/mnt/bn/hlhaoheliu2/semanticodec_log/43_search_best/2024_04_11_lstm_bidirectional_256_rand_centroid/checkpoints/checkpoint-fad-133.00-global_step=1069999.ckpt"
-        elif token_rate == 25:
-            checkpoint_path = "/mnt/bn/hlhaoheliu2/semanticodec_log/43_search_best/2024_04_11_lstm_bidirectional_128_rand_centroid/checkpoints/checkpoint-fad-133.00-global_step=839999.ckpt"
-        else:
-            raise ValueError("token_rate must be 50, 25 or 100")
+        checkpoint_path = "pretrained/semanticodec_tokenrate_%s" % token_rate
+    else:
+        print("Using custom checkpoint path: %s" % checkpoint_path)
 
     feature_dim = basic_config["model"]["params"]["cond_stage_config"]["crossattn_audiomae_pooled"]["params"]["feature_dimension"]
     lstm_layers = basic_config["model"]["params"]["cond_stage_config"]["crossattn_audiomae_pooled"]["params"]["lstm_layer"]

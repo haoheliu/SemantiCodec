@@ -4,7 +4,7 @@ import json
 import torch
 import numpy as np
 
-import hifigan
+import semanticodec.modules.decoder.hifigan as hifigan
 
 
 def get_available_checkpoint_keys(model, ckpt):

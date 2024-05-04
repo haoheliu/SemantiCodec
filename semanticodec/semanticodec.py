@@ -3,7 +3,6 @@ import torch.nn as nn
 import os
 import torchaudio
 import math
-import soundfile as sf
 
 from semanticodec.modules.encoder.encoder import AudioMAEConditionQuantResEncoder
 from semanticodec.modules.decoder.latent_diffusion.models.ddpm import extract_encoder_state_dict, overlap_add_waveform
@@ -33,19 +32,19 @@ class SemantiCodec(nn.Module):
         
         # Initialize encoder and decoder
         config, checkpoint_path, feature_dim, lstm_layers, semanticodebook = get_config(token_rate, semantic_vocab_size, checkpoint_path)
-        
+        encoder_checkpoint_path = os.path.join(checkpoint_path, "encoder.ckpt")
+        decoder_checkpoint_path = os.path.join(checkpoint_path, "decoder.ckpt")
         # Initialize encoder
         print("🚀 Loading SemantiCodec encoder")
         self.encoder = AudioMAEConditionQuantResEncoder(feature_dimension=feature_dim, lstm_layer=lstm_layers, centroid_npy_path=semanticodebook).to(self.device)
-        state_dict = extract_encoder_state_dict(checkpoint_path)
+        state_dict = torch.load(encoder_checkpoint_path)
         self.encoder.load_state_dict(state_dict)
         print("✅ Encoder loaded")
 
         # Initialize decoder
         print("🚀 Loading SemantiCodec decoder")
         self.decoder = instantiate_from_config(config["model"]).to(self.device)
-        checkpoint = torch.load(checkpoint_path)["state_dict"]
-        checkpoint = {k:v for k,v in checkpoint.items() if "clap" not in k and "loss" not in k and "cond_stage" not in k}
+        checkpoint = torch.load(decoder_checkpoint_path)
         self.decoder.load_state_dict(checkpoint)
         print("✅ Decoder loaded")
 
@@ -59,6 +58,10 @@ class SemantiCodec(nn.Module):
         if sr != SAMPLE_RATE:
             waveform = torchaudio.functional.resample(waveform, sr, SAMPLE_RATE)
             sr = SAMPLE_RATE
+        # if stereo to mono
+        if waveform.shape[0] > 1:
+            waveform = waveform[0:1]
+        # Calculate the original duration
         original_duration = waveform.shape[1] / sr
         # This is to pad the audio to the multiplication of 0.16 seconds so that the original audio can be reconstructed
         original_duration = original_duration + (AUDIOMAE_PATCH_DURATION - original_duration % AUDIOMAE_PATCH_DURATION)
@@ -66,6 +69,7 @@ class SemantiCodec(nn.Module):
         target_token_len = 8 * original_duration / AUDIOMAE_PATCH_DURATION / self.stack_factor_K
         segment_sample_length = int(SAMPLE_RATE * SEGMENT_DURATION)
         # Pad audio to the multiplication of 10.24 seconds for easier segmentations
+
         if waveform.shape[1] % segment_sample_length < segment_sample_length:
             waveform = torch.cat([waveform, torch.zeros(1, int(segment_sample_length - waveform.shape[1] % segment_sample_length))], dim=1)
 
@@ -83,7 +87,7 @@ class SemantiCodec(nn.Module):
         return tokens
 
     def decode(self, tokens):
-        windowed_token_list = self.encoder.long_token_split_window(tokens, overlap=SEGMENT_OVERLAP_RATIO)
+        windowed_token_list = self.encoder.long_token_split_window(tokens, window_length = int(512 / self.stack_factor_K), overlap=SEGMENT_OVERLAP_RATIO)
         windowed_waveform = []
         for _, windowed_token in enumerate(windowed_token_list):
             latent = self.encoder.token_to_quantized_feature(windowed_token)

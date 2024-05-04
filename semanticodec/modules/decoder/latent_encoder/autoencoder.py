@@ -1,10 +1,7 @@
-from email.policy import strict
 import torch
 import os
 
-import pytorch_lightning as pl
 import torch.nn.functional as F
-import numpy as np
 from semanticodec.modules.decoder.latent_diffusion.modules.ema import *
 
 from semanticodec.modules.decoder.latent_diffusion.modules.diffusionmodules.model import Encoder, Decoder
@@ -12,13 +9,12 @@ from semanticodec.modules.decoder.latent_diffusion.modules.distributions.distrib
     DiagonalGaussianDistribution,
 )
 
-import wandb
 import soundfile as sf
 
 from semanticodec.modules.decoder.utilities.model import get_vocoder
 from semanticodec.modules.decoder.utilities.tools import synth_one_sample
 
-class AutoencoderKL(pl.LightningModule):
+class AutoencoderKL(nn.Module):
     def __init__(
         self,
         ddconfig=None,
@@ -64,7 +60,6 @@ class AutoencoderKL(pl.LightningModule):
         if ckpt_path is not None:
             self.init_from_ckpt(ckpt_path, ignore_keys=ignore_keys)
         self.learning_rate = float(base_learning_rate)
-        print("Initial learning rate %s" % self.learning_rate)
 
         self.time_shuffle = time_shuffle
         self.reload_from_ckpt = reload_from_ckpt
@@ -185,76 +180,6 @@ class AutoencoderKL(pl.LightningModule):
         log["inputs"] = x
         wavs = self._log_img(log, train=train, index=0, waveform=waveform)
         return wavs
-
-    def _log_img(self, log, train=True, index=0, waveform=None):
-        images_input = self.tensor2numpy(log["inputs"][index, 0]).T
-        images_reconstruct = self.tensor2numpy(log["reconstructions"][index, 0]).T
-        images_samples = self.tensor2numpy(log["samples"][index, 0]).T
-
-        if train:
-            name = "train"
-        else:
-            name = "val"
-
-        if self.logger is not None:
-            self.logger.log_image(
-                "img_%s" % name,
-                [images_input, images_reconstruct, images_samples],
-                caption=["input", "reconstruct", "samples"],
-            )
-
-        inputs, reconstructions, samples = (
-            log["inputs"],
-            log["reconstructions"],
-            log["samples"],
-        )
-
-        if self.image_key == "fbank":
-            wav_original, wav_prediction = synth_one_sample(
-                inputs[index],
-                reconstructions[index],
-                labels="validation",
-                vocoder=self.vocoder,
-            )
-            wav_original, wav_samples = synth_one_sample(
-                inputs[index], samples[index], labels="validation", vocoder=self.vocoder
-            )
-            wav_original, wav_samples, wav_prediction = (
-                wav_original[0],
-                wav_samples[0],
-                wav_prediction[0],
-            )
-        elif self.image_key == "stft":
-            wav_prediction = (
-                self.decode_to_waveform(reconstructions)[index, 0]
-                .cpu()
-                .detach()
-                .numpy()
-            )
-            wav_samples = (
-                self.decode_to_waveform(samples)[index, 0].cpu().detach().numpy()
-            )
-            wav_original = waveform[index, 0].cpu().detach().numpy()
-
-        if self.logger is not None:
-            self.logger.experiment.log(
-                {
-                    "original_%s"
-                    % name: wandb.Audio(
-                        wav_original, caption="original", sample_rate=self.sampling_rate
-                    ),
-                    "reconstruct_%s"
-                    % name: wandb.Audio(
-                        wav_prediction, caption="reconstruct", sample_rate=self.sampling_rate
-                    ),
-                    "samples_%s"
-                    % name: wandb.Audio(
-                        wav_samples, caption="samples", sample_rate=self.sampling_rate
-                    ),
-                }
-            )
-
-        return wav_original, wav_prediction, wav_samples
 
     def tensor2numpy(self, tensor):
         return tensor.cpu().detach().numpy()

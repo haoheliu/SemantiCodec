@@ -35,6 +35,10 @@ VERSION = '0.0.1'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
+    "torch",
+    "torchaudio",
+    "soundfile",
+    "vector-quantize-pytorch"
 ]
 
 # What packages are optional?

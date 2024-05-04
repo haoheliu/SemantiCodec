@@ -2,7 +2,6 @@
 import torch
 import torch.nn as nn
 import numpy as np
-import pytorch_lightning as pl
 from contextlib import contextmanager
 from functools import partial
 from tqdm import tqdm
@@ -24,7 +23,7 @@ from semanticodec.modules.decoder.latent_diffusion.models.ddim import DDIMSample
 from semanticodec.modules.decoder.latent_diffusion.util import disabled_train
 from semanticodec.utils import PositionalEncoding
 
-class DDPM(pl.LightningModule):
+class DDPM(nn.Module):
     # classic DDPM with Gaussian diffusion, in image space
     def __init__(
         self,
@@ -319,6 +318,11 @@ class LatentDiffusion(DDPM):
         *args,
         **kwargs,
     ):
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda")
+        else:
+            self.device = torch.device("cpu")
+
         self.learning_rate = base_learning_rate
         self.num_timesteps_cond = default(num_timesteps_cond, 1)
         self.scale_by_std = scale_by_std
@@ -498,7 +502,7 @@ class LatentDiffusion(DDPM):
 
         return self.mel_spectrogram_to_waveform(mel)
 
-class DiffusionWrapper(pl.LightningModule):
+class DiffusionWrapper(nn.Module):
     def __init__(self, diff_model_config, conditioning_key):
         super().__init__()
         self.diffusion_model = instantiate_from_config(diff_model_config)

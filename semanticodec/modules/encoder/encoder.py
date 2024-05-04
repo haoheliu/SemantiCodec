@@ -7,7 +7,6 @@ from semanticodec.modules.audiomae.AudioMAE import Vanilla_AudioMAE
 from vector_quantize_pytorch import VectorQuantize
 from vector_quantize_pytorch import ResidualVQ
 from semanticodec.utils import concat_1x2, concat_2x2, PositionalEncoding, extract_kaldi_fbank_feature
-import torchaudio
 
 class AudioMAEConditionQuantResEncoder(nn.Module):
     def __init__(
